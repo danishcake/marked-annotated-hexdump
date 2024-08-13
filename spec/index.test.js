@@ -184,6 +184,109 @@ describe("this-extension", () => {
     );
   });
 
+  test("default configuration", () => {
+    // GIVEN two lines of data, with bytes 14/15 missing
+    // AND /width, /case are /missing are explicitly set to their defaults
+    // WHEN the markdown is rendered
+    // THEN the output is unchanged
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/width 16\n" +
+      "/awidth 4\n" +
+      "/case upper\n" +
+      "/missing  \n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n" +
+      "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
+        "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
+        "</code></pre>"
+    );
+  });
+
+  test("address width can be changed", () => {
+    // GIVEN two lines of data, with bytes 14/15 missing
+    // AND /awidth is changed to 2
+    // WHEN the markdown is rendered
+    // THEN the address is 4 characters long
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/awidth 2\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n" +
+      "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
+        "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
+        "</code></pre>"
+    );
+  });
+
+  test("data width can be changed", () => {
+    // GIVEN 14 bytes of data
+    // AND /width is changed to 2
+    // WHEN the markdown is rendered
+    // THEN the data is 4 characters long
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/width 2\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        "00000000 00 01\n" +
+        "00000002 02 03\n" +
+        "00000004 04 05\n" +
+        "00000006 06 07\n" +
+        "00000008 08 09\n" +
+        "0000000A 0A 0B\n" +
+        "0000000C 0C 0D" +
+        "</code></pre>"
+    );
+  });
+
+  test("case can be changed", () => {
+    // GIVEN 14 bytes of data
+    // AND /case is changed to lower
+    // WHEN the markdown is rendered
+    // THEN the output is lower case
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/case lower\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        "00000000 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d      " +
+        "</code></pre>"
+    );
+  });
+
+  test("missing can be changed", () => {
+    // GIVEN 14 bytes of data
+    // AND /missing is changed to ?
+    // WHEN the markdown is rendered
+    // THEN the output contains the ?? marker
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/missing ?\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D ?? ??" +
+        "</code></pre>"
+    );
+  });
+
   test("code with different infostring", () => {
     marked.use(thisExtension());
     const markdown = "```different\nABC\n```";

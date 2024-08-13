@@ -50,21 +50,21 @@ describe("DataToken", () => {
 
 describe("CommandToken", () => {
   describe("width command", () => {
-    test("accepts values between 4 and 32", () => {
-      const cmd4 = CommandToken.parseCommand("/width 4");
-      expect(cmd4).toBeInstanceOf(SetWidthCommand);
-      expect(cmd4.width).toEqual(4);
+    test("accepts values between 2 and 32", () => {
+      const cmd2 = CommandToken.parseCommand("/width 2");
+      expect(cmd2).toBeInstanceOf(SetWidthCommand);
+      expect(cmd2.width).toEqual(2);
 
       const cmd32 = CommandToken.parseCommand("/width 32");
       expect(cmd32).toBeInstanceOf(SetWidthCommand);
       expect(cmd32.width).toEqual(32);
     });
 
-    test("rejects values smaller than 4", () => {
-      expect(() => CommandToken.parseCommand("/width 3")).toThrow(Error);
+    test("rejects 1", () => {
+      expect(() => CommandToken.parseCommand("/width 1")).toThrow(Error);
     });
 
-    test("rejects values greater than 32", () => {
+    test("rejects 33", () => {
       expect(() => CommandToken.parseCommand("/width 33")).toThrow(Error);
     });
   });
@@ -112,24 +112,24 @@ describe("CommandToken", () => {
   });
 
   describe("awidth command", () => {
-    test("accepts 3", () => {
-      const cmd = CommandToken.parseCommand("/awidth 3");
+    test("accepts 2", () => {
+      const cmd = CommandToken.parseCommand("/awidth 2");
       expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
-      expect(cmd.width).toEqual(3);
+      expect(cmd.width).toEqual(2);
     });
 
-    test("accepts 16", () => {
-      const cmd = CommandToken.parseCommand("/awidth 16");
+    test("accepts 8", () => {
+      const cmd = CommandToken.parseCommand("/awidth 8");
       expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
-      expect(cmd.width).toEqual(16);
+      expect(cmd.width).toEqual(8);
     });
 
-    test("rejects 2", () => {
-      expect(() => CommandToken.parseCommand("/awidth 2")).toThrow(Error);
+    test("rejects 1", () => {
+      expect(() => CommandToken.parseCommand("/awidth 1")).toThrow(Error);
     });
 
-    test("rejects 17", () => {
-      expect(() => CommandToken.parseCommand("/awidth 17")).toThrow(Error);
+    test("rejects 9", () => {
+      expect(() => CommandToken.parseCommand("/awidth 9")).toThrow(Error);
     });
 
     test("rejects hex", () => {

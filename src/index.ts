@@ -1,6 +1,6 @@
 import { Tokens } from "marked";
 import { SparseByteArray } from "./sparseByteArray";
-import { BaseToken, DataToken, CommandToken } from "./inputTokens";
+import { BaseToken, DataToken, CommandToken, SetWidthCommand, SetAddressWidthCommand, SetCaseCommand, SetMissingCharacterCommand } from "./inputTokens";
 
 /**
  * Given the input code, extracts the tokens
@@ -50,6 +50,26 @@ function processTokens(tokens: BaseToken[]): string {
   let missingNo = "  ";
   let upperCase = true;
 
+  // Action the configuration tokens
+  for (const token of tokens) {
+    if (token instanceof SetWidthCommand) {
+      lineWidth = token.width;
+    }
+
+    if (token instanceof SetAddressWidthCommand) {
+      addressWidth = token.width;
+    }
+
+    if (token instanceof SetCaseCommand) {
+      upperCase = token.upper;
+    }
+
+    if (token instanceof SetMissingCharacterCommand) {
+      missingNo = `${token.missing}${token.missing}`;
+    }
+  }
+
+  // Extract the DataTokens
   for (const token of tokens) {
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {

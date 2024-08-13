@@ -106,8 +106,8 @@ export class SetWidthCommand extends CommandToken {
     if (Number.isNaN(this.width)) {
       throw new Error(`Error parsing width '${match[1]}'`);
     }
-    if (this.width < 4 || this.width > 32) {
-      throw new Error(`Width must be in range 4-32, found '${this.width}'`);
+    if (this.width < 2 || this.width > 32) {
+      throw new Error(`Width must be in range 2-32, found '${this.width}'`);
     }
   }
 }
@@ -131,8 +131,8 @@ export class SetAddressWidthCommand extends CommandToken {
     if (Number.isNaN(this.width)) {
       throw new Error(`Error parsing width '${match[1]}'`);
     }
-    if (this.width < 3 || this.width > 16) {
-      throw new Error(`Address width must be in range 3-16, found '${this.width}'`);
+    if (this.width < 2 || this.width > 8) {
+      throw new Error(`Address width must be in range 2-8, found '${this.width}'`);
     }
   }
 }
