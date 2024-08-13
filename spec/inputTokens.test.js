@@ -60,6 +60,12 @@ describe("CommandToken", () => {
       expect(cmd32.width).toEqual(32);
     });
 
+    test("allows extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/width      2");
+      expect(cmd).toBeInstanceOf(SetWidthCommand);
+      expect(cmd.width).toEqual(2);
+    });
+
     test("rejects 1", () => {
       expect(() => CommandToken.parseCommand("/width 1")).toThrow(Error);
     });
@@ -78,6 +84,12 @@ describe("CommandToken", () => {
 
     test("accepts lower", () => {
       const cmd = CommandToken.parseCommand("/case lower");
+      expect(cmd).toBeInstanceOf(SetCaseCommand);
+      expect(cmd.upper).toEqual(false);
+    });
+
+    test("allows extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/case     lower");
       expect(cmd).toBeInstanceOf(SetCaseCommand);
       expect(cmd.upper).toEqual(false);
     });
@@ -106,6 +118,12 @@ describe("CommandToken", () => {
       expect(cmd.missing).toEqual(".");
     });
 
+    test("allows extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/missing      .");
+      expect(cmd).toBeInstanceOf(SetMissingCharacterCommand);
+      expect(cmd.missing).toEqual(".");
+    });
+
     test("rejects multiple characters", () => {
       expect(() => CommandToken.parseCommand("/missing ..")).toThrow(Error);
     });
@@ -120,6 +138,12 @@ describe("CommandToken", () => {
 
     test("accepts 8", () => {
       const cmd = CommandToken.parseCommand("/awidth 8");
+      expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
+      expect(cmd.width).toEqual(8);
+    });
+
+    test("allows extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/awidth     8");
       expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
       expect(cmd.width).toEqual(8);
     });
@@ -149,10 +173,32 @@ describe("CommandToken", () => {
       expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
     });
 
+    test("extracts format index", () => {
+      const cmd = CommandToken.parseCommand("/highlight [0:1] /1");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.format).toEqual(1);
+      expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
+    });
+
+    test("allows extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/highlight    [0:1]     x y");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.format).toEqual("x y");
+      expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
+    });
+
     test("rejects whitespace format", () => {
       expect(() => CommandToken.parseCommand("/highlight [0:1]  ")).toThrow(
         Error
       );
+    });
+
+    test("rejects negative format index", () => {
+      expect(() => CommandToken.parseCommand("/highlight [0:1] /-1")).toThrow(Error);
+    });
+
+    test("rejects format index 16", () => {
+      expect(() => CommandToken.parseCommand("/highlight [0:1] /16")).toThrow(Error);
     });
 
     test("rejects missing range", () => {

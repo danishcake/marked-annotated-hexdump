@@ -97,7 +97,7 @@ export class SetWidthCommand extends CommandToken {
   constructor(line: string) {
     super();
 
-    const match = /^\/width ([0-9]+)$/.exec(line);
+    const match = /^\/width +([0-9]+)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -112,7 +112,6 @@ export class SetWidthCommand extends CommandToken {
   }
 }
 
-
 /**
  * Represents the /awidth command
  */
@@ -122,7 +121,7 @@ export class SetAddressWidthCommand extends CommandToken {
   constructor(line: string) {
     super();
 
-    const match = /^\/awidth ([0-9]+)$/.exec(line);
+    const match = /^\/awidth +([0-9]+)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -132,7 +131,9 @@ export class SetAddressWidthCommand extends CommandToken {
       throw new Error(`Error parsing width '${match[1]}'`);
     }
     if (this.width < 2 || this.width > 8) {
-      throw new Error(`Address width must be in range 2-8, found '${this.width}'`);
+      throw new Error(
+        `Address width must be in range 2-8, found '${this.width}'`
+      );
     }
   }
 }
@@ -146,7 +147,7 @@ export class SetCaseCommand extends CommandToken {
   constructor(line: string) {
     super();
 
-    const match = /^\/case (upper|lower)$/.exec(line);
+    const match = /^\/case +(upper|lower)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -164,7 +165,7 @@ export class SetMissingCharacterCommand extends CommandToken {
   constructor(line: string) {
     super();
 
-    const match = /^\/missing (.)$/.exec(line);
+    const match = /^\/missing +(.)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -178,25 +179,42 @@ export class SetMissingCharacterCommand extends CommandToken {
  */
 export class HighlightCommand extends CommandToken {
   ranges: { start: number; end: number }[];
-  format: string;
+  format: string | number;
 
   constructor(line: string) {
     super();
 
-    const match = /^\/highlight \[([0-9a-fA-F:,]+)\] (.+)$/.exec(line);
+    const match = /^\/highlight +\[([0-9a-fA-F:,]+)\] +(.+)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
 
-    this.format = match[2].trim();
-    this.ranges = [];
+    const format = match[2].trim();
 
     // Reject pure whitespace format
-    if (this.format.length == 0) {
+    if (format.length == 0) {
       throw new Error(`Missing or blank format in '${line}'`);
     }
 
+    // Extract /1 to /16 styles
+    if (format.startsWith("/")) {
+      const formatIndex = Number.parseInt(format.slice(1));
+      if (Number.isNaN(formatIndex)) {
+        throw new Error(`Format starting with / was not a number in '${line}'`);
+      }
+      if (formatIndex < 0 || formatIndex > 15) {
+        throw new Error(
+          `Format index '${formatIndex}' outside valid range 0-15 in line '${line}'`
+        );
+      }
+      this.format = formatIndex;
+    } else {
+      // If it doesn't start with a forward slash, store verbatim
+      this.format = match[2].trim();
+    }
+
     // Now parse the ranges. These will be expressed as a series ranges, separated with commas
+    this.ranges = [];
     const ranges = match[1].split(",");
     for (const range of ranges) {
       const match = /^([0-9a-fA-F]+)(:([0-9a-fA-F]+))?$/.exec(range);

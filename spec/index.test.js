@@ -287,6 +287,26 @@ describe("this-extension", () => {
     );
   });
 
+  test("can highlight row subset", () => {
+    // GIVEN 16 bytes of data
+    // AND /highlight set of bytes 4-7 inclusive
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    marked.use(thisExtension());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/highlight [4:7] /1\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump">' +
+        '<svg style="position: absolute; z-index:1;" width="100%" height="100%" top="0" left="0" xmlns="http://www.w3.oprg/2000/svg">' +
+        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00;fill-opacity:0.3;"/></svg>' +
+        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      " +
+        "</code></pre>"
+    );
+  });
+
   test("code with different infostring", () => {
     marked.use(thisExtension());
     const markdown = "```different\nABC\n```";
