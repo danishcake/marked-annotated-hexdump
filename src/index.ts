@@ -9,7 +9,7 @@ import { BaseToken, DataToken, CommandToken } from "./inputTokens";
  */
 function extractTokens(code: string): BaseToken[] {
   // Now parse the input, build the hex output, and output the result
-  const lines = code.split(/\r?\n/).map((p) => p.trim());
+  const lines = code.split(/\r?\n/);
   const tokens: BaseToken[] = [];
 
   for (const line of lines) {

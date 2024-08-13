@@ -71,6 +71,9 @@ export abstract class CommandToken extends BaseToken {
     if (line.startsWith("/width")) {
       return new SetWidthCommand(line);
     }
+    if (line.startsWith("/awidth")) {
+      return new SetAddressWidthCommand(line);
+    }
     if (line.startsWith("/case")) {
       return new SetCaseCommand(line);
     }
@@ -105,6 +108,31 @@ export class SetWidthCommand extends CommandToken {
     }
     if (this.width < 4 || this.width > 32) {
       throw new Error(`Width must be in range 4-32, found '${this.width}'`);
+    }
+  }
+}
+
+
+/**
+ * Represents the /awidth command
+ */
+export class SetAddressWidthCommand extends CommandToken {
+  width: number;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/awidth ([0-9]+)$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.width = Number.parseInt(match[1]);
+    if (Number.isNaN(this.width)) {
+      throw new Error(`Error parsing width '${match[1]}'`);
+    }
+    if (this.width < 3 || this.width > 16) {
+      throw new Error(`Address width must be in range 3-16, found '${this.width}'`);
     }
   }
 }

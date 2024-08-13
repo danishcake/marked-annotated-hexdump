@@ -5,6 +5,7 @@ import {
   SetCaseCommand,
   SetMissingCharacterCommand,
   HighlightCommand,
+  SetAddressWidthCommand,
 } from "../src/inputTokens.ts";
 
 describe("DataToken", () => {
@@ -107,6 +108,36 @@ describe("CommandToken", () => {
 
     test("rejects multiple characters", () => {
       expect(() => CommandToken.parseCommand("/missing ..")).toThrow(Error);
+    });
+  });
+
+  describe("awidth command", () => {
+    test("accepts 3", () => {
+      const cmd = CommandToken.parseCommand("/awidth 3");
+      expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
+      expect(cmd.width).toEqual(3);
+    });
+
+    test("accepts 16", () => {
+      const cmd = CommandToken.parseCommand("/awidth 16");
+      expect(cmd).toBeInstanceOf(SetAddressWidthCommand);
+      expect(cmd.width).toEqual(16);
+    });
+
+    test("rejects 2", () => {
+      expect(() => CommandToken.parseCommand("/awidth 2")).toThrow(Error);
+    });
+
+    test("rejects 17", () => {
+      expect(() => CommandToken.parseCommand("/awidth 17")).toThrow(Error);
+    });
+
+    test("rejects hex", () => {
+      expect(() => CommandToken.parseCommand("/awidth a")).toThrow(Error);
+    });
+
+    test("requires argument", () => {
+      expect(() => CommandToken.parseCommand("/awidth")).toThrow(Error);
     });
   });
 
