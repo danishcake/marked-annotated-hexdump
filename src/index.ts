@@ -25,9 +25,9 @@ function extractTokens(code: string): BaseToken[] {
       continue;
     }
 
-    // If it starts with \, store as a command
-    if (line.startsWith("\\")) {
-      tokens.push(new CommandToken(line));
+    // If it starts with /, store as a command
+    if (line.startsWith("/")) {
+      tokens.push(CommandToken.parseCommand(line));
       continue;
     }
 
