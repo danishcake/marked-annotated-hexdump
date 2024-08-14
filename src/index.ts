@@ -190,16 +190,19 @@ function processTokens(tokens: BaseToken[]): string {
     if (highlightRects.length === 0) {
       return "";
     }
+    // The SVG gets wrapped in an invisible code element so that it
+    // inherits the correct fonts
     return (
-      '<svg style="position: absolute; z-index:1; opacity: 0.3;" width="100%" height="100%" top="0" left="0" xmlns="http://www.w3.oprg/2000/svg">' +
+      '<code style="z-index:1; visibility: hidden; grid-area: container;">' +
+      '<svg style="opacity: 0.3; visibility: visible;" xmlns="http://www.w3.oprg/2000/svg">' +
       highlightRects.join("") +
-      "</svg>"
+      "</svg></code>"
     );
   })();
 
-  return `<pre><code class="language-annotated-hexdump">${svg}${lines
+  return `<pre style="display: grid; grid-template: 'container';"><code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">${lines
     .map((p) => (upperCase ? p.toUpperCase() : p.toLowerCase()))
-    .join("\n")}</code></pre>`;
+    .join("\n")}</code>${svg}</pre>`;
 }
 
 export function annotatedHex() {

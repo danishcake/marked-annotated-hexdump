@@ -226,7 +226,7 @@ export class HighlightCommand extends CommandToken {
       // without the :end part, so detect that and reuse the start offset
       const start = Number.parseInt(match[1], 16);
       const end = (() => {
-        if (match.length == 4) {
+        if (match[3] !== undefined) {
           return Number.parseInt(match[3], 16);
         } else {
           return start;

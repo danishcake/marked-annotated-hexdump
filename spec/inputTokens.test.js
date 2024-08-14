@@ -205,6 +205,34 @@ describe("CommandToken", () => {
       expect(() => CommandToken.parseCommand("/highlight xx")).toThrow(Error);
     });
 
+    test("extracts single element ranges", () => {
+      const cmd = CommandToken.parseCommand("/highlight [1] /0");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
+    });
+
+    test("extracts multiple single element ranges", () => {
+      const cmd = CommandToken.parseCommand("/highlight [1,2,3] /0");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
+      expect(cmd.ranges[1]).toEqual({start: 2, end: 2});
+      expect(cmd.ranges[2]).toEqual({start: 3, end: 3});
+    });
+
+    test("extracts multiple span ranges", () => {
+      const cmd = CommandToken.parseCommand("/highlight [1:2,4:5] /0");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.ranges[0]).toEqual({start: 1, end: 2});
+      expect(cmd.ranges[1]).toEqual({start: 4, end: 5});
+    });
+
+    test("extracts combined span and single element ranges", () => {
+      const cmd = CommandToken.parseCommand("/highlight [1,4:5] /0");
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
+      expect(cmd.ranges[1]).toEqual({start: 4, end: 5});
+    });
+
     test("rejects empty range", () => {
       expect(() => CommandToken.parseCommand("/highlight [] xx")).toThrow(
         Error

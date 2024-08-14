@@ -15,7 +15,8 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n0000 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000000 00 01 02 03                                    </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000000 00 01 02 03                                    </code></pre>"
     );
   });
 
@@ -29,7 +30,8 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000000 00 01 02 03                                    </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000000 00 01 02 03                                    </code></pre>"
     );
   });
 
@@ -44,7 +46,8 @@ describe("this-extension", () => {
       "```annotated-hexdump\n" + "00 01 02\n" + "03 04 05\n" + "06 07 08\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000000 00 01 02 03 04 05 06 07 08                     </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000000 00 01 02 03 04 05 06 07 08                     </code></pre>"
     );
   });
 
@@ -56,7 +59,8 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000010 00 01 02 03                                    </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000010 00 01 02 03                                    </code></pre>"
     );
   });
 
@@ -68,7 +72,8 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n0000000000000010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000010 00 01 02 03                                    </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000010 00 01 02 03                                    </code></pre>"
     );
   });
 
@@ -80,7 +85,8 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n024 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000020             00 01 02 03                        </code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000020             00 01 02 03                        </code></pre>"
     );
   });
 
@@ -93,7 +99,8 @@ describe("this-extension", () => {
       "```annotated-hexdump\n0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F</code></pre>'
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F</code></pre>"
     );
   });
 
@@ -108,7 +115,7 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n" +
         "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
         "</code></pre>"
@@ -128,7 +135,7 @@ describe("this-extension", () => {
       "001F 1F 20 21 22\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03                                    \n" +
         "00000010             14 15 16 17                      1F\n" +
         "00000020 20 21 22                                       " +
@@ -149,7 +156,7 @@ describe("this-extension", () => {
       "0040 40 41 42 43\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03                                    \n" +
         "00000010 ...\n" +
         "00000020 20 21 22 23                                    \n" +
@@ -174,7 +181,7 @@ describe("this-extension", () => {
     let html = marked(markdown);
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03                                    \n" +
         "00000010 ...\n" +
         "00000040 40 41 42 43                                    \n" +
@@ -200,7 +207,7 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
         "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
         "</code></pre>"
@@ -220,7 +227,7 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
         "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
         "</code></pre>"
@@ -239,7 +246,7 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01\n" +
         "00000002 02 03\n" +
         "00000004 04 05\n" +
@@ -263,7 +270,7 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d      " +
         "</code></pre>"
     );
@@ -281,14 +288,14 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D ?? ??" +
         "</code></pre>"
     );
   });
 
   test("can highlight row subset", () => {
-    // GIVEN 16 bytes of data
+    // GIVEN 14 bytes of data
     // AND /highlight set of bytes 4-7 inclusive
     // WHEN the markdown is rendered
     // THEN the SVG is included
@@ -299,10 +306,56 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump">' +
-        '<svg style="position: absolute; z-index:1;" width="100%" height="100%" top="0" left="0" xmlns="http://www.w3.oprg/2000/svg">' +
-        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00;fill-opacity:0.3;"/></svg>' +
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
+        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00"/></svg>' +
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      " +
+        "</code></pre>"
+    );
+  });
+
+  test("can highlight data on second row", () => {
+    // GIVEN 16 bytes of data
+    // AND row width of 8
+    // AND /highlight set of bytes 8-10 inclusive
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    marked.use(annotatedHex());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/highlight [8:A] /1\n" +
+      "/width 8\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
+        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/></svg>' +
+        "00000000 00 01 02 03 04 05 06 07\n" +
+        "00000008 08 09 0A 0B 0C 0D 0E 0F" +
+        "</code></pre>"
+    );
+  });
+
+  test("can highlight data on multiple rows", () => {
+    // GIVEN 16 bytes of data
+    // AND row width of 8
+    // AND /highlight set of bytes 8-10 inclusive
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    marked.use(annotatedHex());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/highlight [8:A] /1\n" +
+      "/width 8\n" +
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
+
+    expect(marked(markdown)).toBe(
+      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
+        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/></svg>' +
+        "00000000 00 01 02 03 04 05 06 07\n" +
+        "00000008 08 09 0A 0B 0C 0D 0E 0F" +
         "</code></pre>"
     );
   });

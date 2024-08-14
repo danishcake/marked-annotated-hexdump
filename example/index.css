@@ -1,18 +1,48 @@
+html,
 body {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 .input {
-    flex-grow: 1;
+  margin: 4px;
+  flex-grow: 1;
 }
 
 .output {
-    flex-grow: 1;
+  margin: 4px;
+  flex-grow: 1;
+}
+
+.output-with-error {
+  border: 2px solid red;
+}
+
+.error {
+  margin: 4px;
+  flex-grow: 0;
+}
+
+/* Code block (not including the containing code)*/
+pre {
+  padding: 2px;
+  border: 1px solid rgb(0, 0, 0);
+  background: rgb(230, 230, 230);
+  box-shadow: 1px 1px black;
+  break-inside: avoid;
+}
+
+/* Inline code block */
+code {
+  background: rgb(230, 230, 230);
+  border-radius: 2px;
+  font-size: 80%;
+  font-family: "Courier New", Courier, monospace;
+  white-space: pre-wrap;
 }
