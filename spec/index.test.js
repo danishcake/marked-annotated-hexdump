@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import thisExtension from "../src/index.ts";
+import { annotatedHex } from "../src/index.ts";
 
 describe("this-extension", () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe("this-extension", () => {
     // WHEN markdown is rendered
     // THEN there is a four byte offset, followed by 16 bytes of output where only the first four bytes
     //      are populated
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```annotated-hexdump\n0000 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
@@ -25,7 +25,7 @@ describe("this-extension", () => {
     // THEN there is a four byte offset, followed by 16 bytes of output where only the first four bytes
     //      are populated. The output is the same as if the offset was explicitly set to zero
 
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```annotated-hexdump\n00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
@@ -39,7 +39,7 @@ describe("this-extension", () => {
     // THEN there is a four byte offset, followed by 16 bytes of output where only the first nine bytes
     //      are populated. The three byte ranges are concatenated, implicitly continuing the previous
 
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" + "00 01 02\n" + "03 04 05\n" + "06 07 08\n```";
 
@@ -52,7 +52,7 @@ describe("this-extension", () => {
     // GIVEN an explicit offset specified with three characters
     // WHEN markdown is rendered
     // THEN the three character offset is recognised
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```annotated-hexdump\n010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
@@ -64,7 +64,7 @@ describe("this-extension", () => {
     // GIVEN a full 16 character offset
     // WHEN the markdown is rendered
     // THEN the sixteen character offset is recognised
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```annotated-hexdump\n0000000000000010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
@@ -76,7 +76,7 @@ describe("this-extension", () => {
     // GIVEN an offset that isn't aligned to the line width
     // WHEN the markdown is rendered
     // THEN the line starting position is aligned
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```annotated-hexdump\n024 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
@@ -88,7 +88,7 @@ describe("this-extension", () => {
     // GIVEN an offset, and sixteen bytes (the default line width)
     // WHEN the markdown is rendered
     // THEN there is a four byte offset, followed by all sixteen bytes of input
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
@@ -101,7 +101,7 @@ describe("this-extension", () => {
     // GIVEN two full lines for the first 32 bytes
     // WHEN the markdown is rendered
     // THEN there are two lines of fully populated output
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n" +
@@ -120,7 +120,7 @@ describe("this-extension", () => {
     // WHEN the markdown is rendered
     // THEN there are three lines of output, with the sparse data in the correct locations
 
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "0000 00 01 02 03\n" +
@@ -141,7 +141,7 @@ describe("this-extension", () => {
     // WHEN the markdown is rendered
     // THEN the unpopulated lines are replaced with an offset and ...
 
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "0000 00 01 02 03\n" +
@@ -164,7 +164,7 @@ describe("this-extension", () => {
     // WHEN the markdown is rendered
     // THEN the multiple unpopulated lines are consolidated
 
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "0000 00 01 02 03\n" +
@@ -189,7 +189,7 @@ describe("this-extension", () => {
     // AND /width, /case are /missing are explicitly set to their defaults
     // WHEN the markdown is rendered
     // THEN the output is unchanged
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/width 16\n" +
@@ -212,7 +212,7 @@ describe("this-extension", () => {
     // AND /awidth is changed to 2
     // WHEN the markdown is rendered
     // THEN the address is 4 characters long
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/awidth 2\n" +
@@ -232,7 +232,7 @@ describe("this-extension", () => {
     // AND /width is changed to 2
     // WHEN the markdown is rendered
     // THEN the data is 4 characters long
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/width 2\n" +
@@ -256,7 +256,7 @@ describe("this-extension", () => {
     // AND /case is changed to lower
     // WHEN the markdown is rendered
     // THEN the output is lower case
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/case lower\n" +
@@ -274,7 +274,7 @@ describe("this-extension", () => {
     // AND /missing is changed to ?
     // WHEN the markdown is rendered
     // THEN the output contains the ?? marker
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/missing ?\n" +
@@ -292,7 +292,7 @@ describe("this-extension", () => {
     // AND /highlight set of bytes 4-7 inclusive
     // WHEN the markdown is rendered
     // THEN the SVG is included
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown =
       "```annotated-hexdump\n" +
       "/highlight [4:7] /1\n" +
@@ -308,7 +308,7 @@ describe("this-extension", () => {
   });
 
   test("code with different infostring", () => {
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "```different\nABC\n```";
 
     expect(marked(markdown)).toBe(
@@ -317,14 +317,14 @@ describe("this-extension", () => {
   });
 
   test("markdown not using this extension", () => {
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     const markdown = "not example markdown";
 
     expect(marked(markdown)).not.toBe("<p>example html</p>\n");
   });
 
   test("address width too small for address", () => {
-    marked.use(thisExtension());
+    marked.use(annotatedHex());
     // TODO: Test a small address width with a long address
   });
 });

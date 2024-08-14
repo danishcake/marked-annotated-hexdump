@@ -45,6 +45,7 @@
     "@babel/preset-env": "^7.25.3",
     "@babel/preset-typescript": "^7.24.7",
     "@markedjs/eslint-config": "^1.0.1",
+    "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-typescript": "^11.1.6",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.0",
@@ -59,6 +60,8 @@
     "jest-cli": "^29.7.0",
     "marked": "^14.0.0",
     "rollup": "^4.20.0",
-    "semantic-release": "^24.0.0"
+    "semantic-release": "^24.0.0",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4"
   }
 }

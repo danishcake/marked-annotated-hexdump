@@ -15,22 +15,22 @@ import {
  * Standard highlighting styles
  */
 const STANDARD_STYLES: string[] = [
-  "fill:#ff0000;fill-opacity:0.3;",
-  "fill:#00ff00;fill-opacity:0.3;",
-  "fill:#0000ff;fill-opacity:0.3;",
-  "fill:#ffff00;fill-opacity:0.3;",
-  "fill:#00ffff;fill-opacity:0.3;",
-  "fill:#ff00ff;fill-opacity:0.3;",
-  "fill:#ffffff;fill-opacity:0.3;",
-  "fill:#000000;fill-opacity:0.3;",
-  "fill:#ff7f7f;fill-opacity:0.4;",
-  "fill:#7fff7f;fill-opacity:0.4;",
-  "fill:#7f7fff;fill-opacity:0.4;",
-  "fill:#FFFF7F;fill-opacity:0.4;",
-  "fill:#FF7FFF;fill-opacity:0.4;",
-  "fill:#7FFFFF;fill-opacity:0.4;",
-  "fill:#7F7F7F;fill-opacity:0.4;",
-  "fill:#bdb76b;fill-opacity:0.4;",
+  "fill:#ff0000",
+  "fill:#00ff00",
+  "fill:#0000ff",
+  "fill:#ffff00",
+  "fill:#00ffff",
+  "fill:#ff00ff",
+  "fill:#ffffff",
+  "fill:#000000",
+  "fill:#ff7f7f",
+  "fill:#7fff7f",
+  "fill:#7f7fff",
+  "fill:#FFFF7F",
+  "fill:#FF7FFF",
+  "fill:#7FFFFF",
+  "fill:#7F7F7F",
+  "fill:#bdb76b",
 ];
 
 /**
@@ -164,7 +164,7 @@ function processTokens(tokens: BaseToken[]): string {
           // if there was some overlap, create the rectangle
           if (upper >= lower) {
             // Units are characters - ch in x and 1.2em in height
-            const x0 = addressWidth * 2 + 1 + lower * 3;
+            const x0 = addressWidth * 2 + 1 + (lower - startPosition) * 3;
             const y0 = lines.length - 1;
             const w = (upper - lower + 1) * 3 - 1;
 
@@ -191,7 +191,7 @@ function processTokens(tokens: BaseToken[]): string {
       return "";
     }
     return (
-      '<svg style="position: absolute; z-index:1;" width="100%" height="100%" top="0" left="0" xmlns="http://www.w3.oprg/2000/svg">' +
+      '<svg style="position: absolute; z-index:1; opacity: 0.3;" width="100%" height="100%" top="0" left="0" xmlns="http://www.w3.oprg/2000/svg">' +
       highlightRects.join("") +
       "</svg>"
     );
@@ -202,7 +202,7 @@ function processTokens(tokens: BaseToken[]): string {
     .join("\n")}</code></pre>`;
 }
 
-export default function () {
+export function annotatedHex() {
   return {
     renderer: {
       code: (code: Tokens.Code | string, infostring: string | undefined) => {
