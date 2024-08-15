@@ -3,15 +3,15 @@ export default {
   clearMocks: true,
   // collectCoverage: true,
   collectCoverageFrom: [
-    'src/index.js',
+    'src/**/*.ts',
   ],
   coverageDirectory: 'coverage',
   coverageThreshold: {
     global: {
-      branches: 100,
+      branches: 90,
       functions: 100,
-      lines: 100,
-      statements: 100,
+      lines: 90,
+      statements: 90,
     },
   },
   testRegex: /\.test\.js$/.source,

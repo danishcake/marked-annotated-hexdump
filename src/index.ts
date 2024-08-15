@@ -1,5 +1,5 @@
-import { Tokens } from "marked";
-import { SparseByteArray } from "./sparseByteArray";
+import { Tokens } from 'marked';
+import { SparseByteArray } from './sparseByteArray';
 import {
   BaseToken,
   DataToken,
@@ -10,29 +10,29 @@ import {
   SetMissingCharacterCommand,
   HighlightCommand,
   SetBaseAddressCommand,
-} from "./inputTokens";
-import { maxBigInt, minBigInt } from "./bigint";
+} from './inputTokens';
+import { maxBigInt, minBigInt } from './bigint';
 
 /**
  * Standard highlighting styles
  */
 const STANDARD_STYLES: string[] = [
-  "fill:#ff0000",
-  "fill:#00ff00",
-  "fill:#0000ff",
-  "fill:#ffff00",
-  "fill:#00ffff",
-  "fill:#ff00ff",
-  "fill:#ffffff",
-  "fill:#000000",
-  "fill:#ff7f7f",
-  "fill:#7fff7f",
-  "fill:#7f7fff",
-  "fill:#FFFF7F",
-  "fill:#FF7FFF",
-  "fill:#7FFFFF",
-  "fill:#7F7F7F",
-  "fill:#bdb76b",
+  'fill:#ff0000',
+  'fill:#00ff00',
+  'fill:#0000ff',
+  'fill:#ffff00',
+  'fill:#00ffff',
+  'fill:#ff00ff',
+  'fill:#ffffff',
+  'fill:#000000',
+  'fill:#ff7f7f',
+  'fill:#7fff7f',
+  'fill:#7f7fff',
+  'fill:#FFFF7F',
+  'fill:#FF7FFF',
+  'fill:#7FFFFF',
+  'fill:#7F7F7F',
+  'fill:#bdb76b',
 ];
 
 /**
@@ -48,7 +48,7 @@ function extractTokens(code: string): BaseToken[] {
   for (const line of lines) {
     // If line starts with #, ignore it
     // If line is blank, ignore it
-    if (line.startsWith("#") || line === "") {
+    if (line.startsWith('#') || line === '') {
       continue;
     }
 
@@ -59,7 +59,7 @@ function extractTokens(code: string): BaseToken[] {
     }
 
     // If it starts with /, store as a command
-    if (line.startsWith("/")) {
+    if (line.startsWith('/')) {
       tokens.push(CommandToken.parseCommand(line));
       continue;
     }
@@ -79,8 +79,8 @@ function processTokens(tokens: BaseToken[]): string {
   let lineWidth = 16;
   let addressWidth = 4; // Units are bytes, not characters
   let offset = BigInt(0);
-  let data = new SparseByteArray();
-  let missingNo = "  ";
+  const data = new SparseByteArray();
+  let missingNo = '  ';
   let upperCase = true;
   let baseAddress = BigInt(0);
 
@@ -121,16 +121,16 @@ function processTokens(tokens: BaseToken[]): string {
 
   // Detect if address width is too small
   if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth) {
-    throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`)
+    throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`);
   }
 
   // Detect no data
   if (data.getOrigin() - data.getEnd() === BigInt(0)) {
-    throw new Error("No hex data provided")
+    throw new Error('No hex data provided');
   }
 
   const highlightTokens: HighlightCommand[] = tokens.filter(
-    (p) => p instanceof HighlightCommand
+    (p) => p instanceof HighlightCommand,
   ) as HighlightCommand[];
 
   // Determine the address of the first line
@@ -157,19 +157,19 @@ function processTokens(tokens: BaseToken[]): string {
       if (!lastRowWasBlank) {
         const address = startPosition
           .toString(16)
-          .padStart(addressWidth * 2, "0");
-        const data = "...";
-        lines.push(address + " " + data);
+          .padStart(addressWidth * 2, '0');
+        const data = '...';
+        lines.push(address + ' ' + data);
       }
       lastRowWasBlank = true;
     } else {
       const address = startPosition
         .toString(16)
-        .padStart(addressWidth * 2, "0");
+        .padStart(addressWidth * 2, '0');
       const data = cells
-        .map((p) => p?.toString(16).padStart(2, "0") ?? missingNo)
-        .join(" ");
-      lines.push(address + " " + data);
+        .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo)
+        .join(' ');
+      lines.push(address + ' ' + data);
       lastRowWasBlank = false;
 
       // Now build the highlighted areas
@@ -188,7 +188,7 @@ function processTokens(tokens: BaseToken[]): string {
 
             // Determine the style
             const style: string = (() => {
-              if (typeof tk.format === "number") {
+              if (typeof tk.format === 'number') {
                 return STANDARD_STYLES[tk.format];
               } else {
                 return tk.format;
@@ -196,7 +196,7 @@ function processTokens(tokens: BaseToken[]): string {
             })();
 
             highlightRects.push(
-              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="calc(1.2em * ${y0})" style="${style}"/>`
+              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="calc(1.2em * ${y0})" style="${style}"/>`,
             );
           }
         }
@@ -206,21 +206,21 @@ function processTokens(tokens: BaseToken[]): string {
 
   const svg = (() => {
     if (highlightRects.length === 0) {
-      return "";
+      return '';
     }
     // The SVG gets wrapped in an invisible code element so that it
     // inherits the correct fonts
     return (
-      '<code style="z-index:1; visibility: hidden; grid-area: container;">' +
-      '<svg style="opacity: 0.3; visibility: visible; width: 100%; height: 100%;" xmlns="http://www.w3.oprg/2000/svg">' +
-      highlightRects.join("") +
-      "</svg></code>"
+      '<code style="z-index:1; visibility: hidden; grid-area: container;">'
+      + '<svg style="opacity: 0.3; visibility: visible; width: 100%; height: 100%;" xmlns="http://www.w3.oprg/2000/svg">'
+      + highlightRects.join('')
+      + '</svg></code>'
     );
   })();
 
   return `<pre style="display: grid; grid-template: 'container';"><code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">${lines
     .map((p) => (upperCase ? p.toUpperCase() : p.toLowerCase()))
-    .join("\n")}</code>${svg}</pre>`;
+    .join('\n')}</code>${svg}</pre>`;
 }
 
 export function annotatedHex() {
@@ -229,12 +229,12 @@ export function annotatedHex() {
       code: (code: Tokens.Code | string, infostring: string | undefined) => {
         // More modern versions of markedjs use an object here
         /* istanbul ignore next */
-        if (typeof code === "object") {
+        if (typeof code === 'object') {
           infostring = code.lang;
           code = code.text;
         }
 
-        if (infostring !== "annotated-hexdump") {
+        if (infostring !== 'annotated-hexdump') {
           /* istanbul ignore next */
           return false;
         }

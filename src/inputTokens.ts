@@ -1,4 +1,4 @@
-import { parseBigIntHex } from "./bigint";
+import { parseBigIntHex } from './bigint';
 
 export class BaseToken {}
 
@@ -28,15 +28,15 @@ export class DataToken extends BaseToken {
     if (offsetMatch != null) {
       this.offset = parseBigIntHex(offsetMatch[1]);
       // Trim the offset
-      line = line.replace(/^([0-9a-fA-F]{3,16})/, "");
+      line = line.replace(/^([0-9a-fA-F]{3,16})/, '');
     }
 
     // Remove all whitespace
-    line = line.replace(/ /g, "");
+    line = line.replace(/ /g, '');
 
     // Assert length is divisible by 2
-    if (line.length % 2 != 0) {
-      throw new Error(`Uneven number of bytes found`);
+    if (line.length % 2 !== 0) {
+      throw new Error('Uneven number of bytes found');
     }
 
     // Extract as hex digits
@@ -57,36 +57,32 @@ export class DataToken extends BaseToken {
  * A token that contains formatting commands
  */
 export abstract class CommandToken extends BaseToken {
-  constructor() {
-    super();
-  }
-
   /**
    * Extracts the correct command from the input line
    * @param line Line known to contain a command
    * @returns The correct CommandToken subclass, or throws an Error
    */
   static parseCommand(line: string): CommandToken {
-    if (line.startsWith("/width")) {
+    if (line.startsWith('/width')) {
       return new SetWidthCommand(line);
     }
-    if (line.startsWith("/awidth")) {
+    if (line.startsWith('/awidth')) {
       return new SetAddressWidthCommand(line);
     }
-    if (line.startsWith("/case")) {
+    if (line.startsWith('/case')) {
       return new SetCaseCommand(line);
     }
-    if (line.startsWith("/missing")) {
+    if (line.startsWith('/missing')) {
       return new SetMissingCharacterCommand(line);
     }
-    if (line.startsWith("/highlight")) {
+    if (line.startsWith('/highlight')) {
       return new HighlightCommand(line);
     }
-    if (line.startsWith("/baseaddress")) {
+    if (line.startsWith('/baseaddress')) {
       return new SetBaseAddressCommand(line);
     }
 
-    throw new Error("Unrecognised command");
+    throw new Error('Unrecognised command');
   }
 }
 
@@ -134,7 +130,7 @@ export class SetAddressWidthCommand extends CommandToken {
     }
     if (this.width < 2 || this.width > 8) {
       throw new Error(
-        `Address width must be in range 2-8, found '${this.width}'`
+        `Address width must be in range 2-8, found '${this.width}'`,
       );
     }
   }
@@ -154,7 +150,7 @@ export class SetCaseCommand extends CommandToken {
       throw new Error(`Error parsing command '${line}'`);
     }
 
-    this.upper = match[1] === "upper";
+    this.upper = match[1] === 'upper';
   }
 }
 
@@ -194,19 +190,19 @@ export class HighlightCommand extends CommandToken {
     const format = match[2].trim();
 
     // Reject pure whitespace format
-    if (format.length == 0) {
+    if (format.length === 0) {
       throw new Error(`Missing or blank format in '${line}'`);
     }
 
     // Extract /1 to /16 styles
-    if (format.startsWith("/")) {
+    if (format.startsWith('/')) {
       const formatIndex = Number.parseInt(format.slice(1));
       if (Number.isNaN(formatIndex)) {
         throw new Error(`Format starting with / was not a number in '${line}'`);
       }
       if (formatIndex < 0 || formatIndex > 15) {
         throw new Error(
-          `Format index '${formatIndex}' outside valid range 0-15 in line '${line}'`
+          `Format index '${formatIndex}' outside valid range 0-15 in line '${line}'`,
         );
       }
       this.format = formatIndex;
@@ -217,7 +213,7 @@ export class HighlightCommand extends CommandToken {
 
     // Now parse the ranges. These will be expressed as a series ranges, separated with commas
     this.ranges = [];
-    const ranges = match[1].split(",");
+    const ranges = match[1].split(',');
     for (const range of ranges) {
       const match = /^([0-9a-fA-F]+)(:([0-9a-fA-F]+))?$/.exec(range);
       if (!match) {
@@ -260,9 +256,9 @@ export class SetBaseAddressCommand extends CommandToken {
     }
 
     this.baseAddress = parseBigIntHex(match[1]);
-    if (this.baseAddress < BigInt(0) || this.baseAddress > BigInt(0xFFFFFFFFFFFFFFFF)) {
+    if (this.baseAddress < BigInt(0) || this.baseAddress > BigInt('0xFFFFFFFFFFFFFFFF')) {
       throw new Error(
-        `Base address must be in range 0-2^64-1", found '${this.baseAddress}'`
+        `Base address must be in range 0-2^64-1", found '${this.baseAddress}'`,
       );
     }
   }

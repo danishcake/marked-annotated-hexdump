@@ -3,7 +3,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: ['**/lib'],
+    ignores: ['**/lib', '**/dist'],
   },
   ...markedEslintConfig,
   {

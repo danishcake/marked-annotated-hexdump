@@ -1,22 +1,22 @@
-import { SparseByteArray } from "../src/sparseByteArray";
+import { SparseByteArray } from '../src/sparseByteArray';
 
-describe("SparseByteArray", () => {
-  test("empty SBA getByte returns null", () => {
+describe('SparseByteArray', () => {
+  test('empty SBA getByte returns null', () => {
     const sba = new SparseByteArray();
     expect(sba.getByte()).toEqual(null);
   });
 
-  test("empty SBA getOrigin throws", () => {
+  test('empty SBA getOrigin throws', () => {
     const sba = new SparseByteArray();
     expect(() => sba.getOrigin()).toThrow(Error);
   });
 
-  test("empty SBA getEnd throws", () => {
+  test('empty SBA getEnd throws', () => {
     const sba = new SparseByteArray();
     expect(() => sba.getEnd()).toThrow(Error);
   });
 
-  test("inserted data updates start/end", () => {
+  test('inserted data updates start/end', () => {
     const sba = new SparseByteArray();
     sba.setBytes(BigInt(5), new ArrayBuffer(10));
     sba.setBytes(BigInt(20), new ArrayBuffer(10));
@@ -24,7 +24,7 @@ describe("SparseByteArray", () => {
     expect(sba.getOrigin()).toEqual(BigInt(5));
   });
 
-  test("inserted data updates can be retrieved", () => {
+  test('inserted data updates can be retrieved', () => {
     const sba = new SparseByteArray();
     sba.setBytes(BigInt(5), new ArrayBuffer(10));
     sba.setBytes(BigInt(20), new ArrayBuffer(10));
@@ -35,7 +35,7 @@ describe("SparseByteArray", () => {
     expect(sba.getByte(BigInt(20))).toEqual(0);
   });
 
-  test("inserted data updates reject overlaps", () => {
+  test('inserted data updates reject overlaps', () => {
     const sba = new SparseByteArray();
     sba.setBytes(BigInt(10), new ArrayBuffer(10));
     expect(() => sba.setBytes(BigInt(10), new ArrayBuffer(10))).toThrow(Error);

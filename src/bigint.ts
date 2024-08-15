@@ -5,8 +5,8 @@
  * @throws RangeError, TypeError or SyntaxError
  */
 export function parseBigIntHex(input: string): bigint {
-  if (!input.startsWith("0x")) {
-    input = "0x" + input;
+  if (!input.startsWith('0x')) {
+    input = '0x' + input;
   }
 
   return BigInt(input);
@@ -19,7 +19,7 @@ export function parseBigIntHex(input: string): bigint {
  */
 export function maxBigInt(...args: bigint[]): bigint {
   if (args.length < 1) {
-    throw new Error("Max of empty list");
+    throw new Error('Max of empty list');
   }
   let m = args[0];
   args.forEach((a) => {
@@ -37,7 +37,7 @@ export function maxBigInt(...args: bigint[]): bigint {
  */
 export function minBigInt(...args: bigint[]): bigint {
   if (args.length < 1) {
-    throw new Error("Min of empty list");
+    throw new Error('Min of empty list');
   }
   let m = args[0];
   args.forEach((a) => {
@@ -56,7 +56,7 @@ export function minBigInt(...args: bigint[]): bigint {
  */
 export function sortComparatorBigInt(lhs: bigint, rhs: bigint): number {
   if (lhs > rhs) {
-    return 1
+    return 1;
   } else if (lhs < rhs) {
     return -1;
   } else {
