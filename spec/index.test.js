@@ -1,6 +1,16 @@
 import { marked } from "marked";
 import { annotatedHex } from "../src/index.ts";
 
+const PRE_CODE =
+  "<pre style=\"display: grid; grid-template: 'container';\">" +
+  '<code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">';
+const POST_CODE = "</code></pre>";
+const PRE_SVG =
+  '<code style="z-index:1; visibility: hidden; grid-area: container;"><svg style="opacity: 0.3; visibility: visible; width: 100%; height: 100%;" xmlns="http://www.w3.oprg/2000/svg">';
+const TOP_AND_TAIL = (data) => `${PRE_CODE}${data}${POST_CODE}`;
+const TOP_AND_TAIL_SVG = (data, svg) =>
+  `${PRE_CODE}${data}</code>${PRE_SVG}${svg}</svg>${POST_CODE}`;
+
 describe("this-extension", () => {
   beforeEach(() => {
     marked.setOptions(marked.getDefaults());
@@ -15,8 +25,7 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n0000 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03                                    </code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03                                    ")
     );
   });
 
@@ -30,8 +39,7 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03                                    </code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03                                    ")
     );
   });
 
@@ -46,8 +54,7 @@ describe("this-extension", () => {
       "```annotated-hexdump\n" + "00 01 02\n" + "03 04 05\n" + "06 07 08\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03 04 05 06 07 08                     </code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03 04 05 06 07 08                     ")
     );
   });
 
@@ -59,8 +66,7 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000010 00 01 02 03                                    </code></pre>"
+      TOP_AND_TAIL("00000010 00 01 02 03                                    ")
     );
   });
 
@@ -72,8 +78,7 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n0000000000000010 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000010 00 01 02 03                                    </code></pre>"
+      TOP_AND_TAIL("00000010 00 01 02 03                                    ")
     );
   });
 
@@ -85,8 +90,7 @@ describe("this-extension", () => {
     const markdown = "```annotated-hexdump\n024 00 01 02 03\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000020             00 01 02 03                        </code></pre>"
+      TOP_AND_TAIL("00000020             00 01 02 03                        ")
     );
   });
 
@@ -99,8 +103,7 @@ describe("this-extension", () => {
       "```annotated-hexdump\n0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F</code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F")
     );
   });
 
@@ -115,10 +118,10 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n" +
-        "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
-        "</code></pre>"
+          "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F"
+      )
     );
   });
 
@@ -135,11 +138,11 @@ describe("this-extension", () => {
       "001F 1F 20 21 22\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01 02 03                                    \n" +
-        "00000010             14 15 16 17                      1F\n" +
-        "00000020 20 21 22                                       " +
-        "</code></pre>"
+          "00000010             14 15 16 17                      1F\n" +
+          "00000020 20 21 22                                       "
+      )
     );
   });
 
@@ -156,13 +159,13 @@ describe("this-extension", () => {
       "0040 40 41 42 43\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01 02 03                                    \n" +
-        "00000010 ...\n" +
-        "00000020 20 21 22 23                                    \n" +
-        "00000030 ...\n" +
-        "00000040 40 41 42 43                                    " +
-        "</code></pre>"
+          "00000010 ...\n" +
+          "00000020 20 21 22 23                                    \n" +
+          "00000030 ...\n" +
+          "00000040 40 41 42 43                                    "
+      )
     );
   });
 
@@ -181,13 +184,13 @@ describe("this-extension", () => {
     let html = marked(markdown);
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01 02 03                                    \n" +
-        "00000010 ...\n" +
-        "00000040 40 41 42 43                                    \n" +
-        "00000050 ...\n" +
-        "00000080 80 81 82 83                                    " +
-        "</code></pre>"
+          "00000010 ...\n" +
+          "00000040 40 41 42 43                                    \n" +
+          "00000050 ...\n" +
+          "00000080 80 81 82 83                                    "
+      )
     );
   });
 
@@ -207,10 +210,10 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
-        "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
-        "</code></pre>"
+          "00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F"
+      )
     );
   });
 
@@ -227,10 +230,10 @@ describe("this-extension", () => {
       "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      \n" +
-        "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F" +
-        "</code></pre>"
+          "0010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F"
+      )
     );
   });
 
@@ -246,15 +249,15 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
+      TOP_AND_TAIL(
         "00000000 00 01\n" +
-        "00000002 02 03\n" +
-        "00000004 04 05\n" +
-        "00000006 06 07\n" +
-        "00000008 08 09\n" +
-        "0000000A 0A 0B\n" +
-        "0000000C 0C 0D" +
-        "</code></pre>"
+          "00000002 02 03\n" +
+          "00000004 04 05\n" +
+          "00000006 06 07\n" +
+          "00000008 08 09\n" +
+          "0000000A 0A 0B\n" +
+          "0000000C 0C 0D"
+      )
     );
   });
 
@@ -270,9 +273,7 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d      " +
-        "</code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d      ")
     );
   });
 
@@ -288,9 +289,7 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D ?? ??" +
-        "</code></pre>"
+      TOP_AND_TAIL("00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D ?? ??")
     );
   });
 
@@ -306,11 +305,10 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
-        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00"/></svg>' +
-        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      " +
-        "</code></pre>"
+      TOP_AND_TAIL_SVG(
+        "00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      ",
+        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00"/>'
+      )
     );
   });
 
@@ -328,12 +326,11 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
-        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/></svg>' +
-        "00000000 00 01 02 03 04 05 06 07\n" +
-        "00000008 08 09 0A 0B 0C 0D 0E 0F" +
-        "</code></pre>"
+      TOP_AND_TAIL_SVG(
+          "00000000 00 01 02 03 04 05 06 07\n" +
+          "00000008 08 09 0A 0B 0C 0D 0E 0F",
+          '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>'
+      )
     );
   });
 
@@ -351,12 +348,11 @@ describe("this-extension", () => {
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
     expect(marked(markdown)).toBe(
-      '<pre><code class="language-annotated-hexdump" style="position: relative">' +
-        '<svg style="position: absolute; z-index:1; opacity: 0.3; top: 0; bottom: 0;" width="100%" xmlns="http://www.w3.oprg/2000/svg">' +
-        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/></svg>' +
-        "00000000 00 01 02 03 04 05 06 07\n" +
-        "00000008 08 09 0A 0B 0C 0D 0E 0F" +
-        "</code></pre>"
+      TOP_AND_TAIL_SVG(
+          "00000000 00 01 02 03 04 05 06 07\n" +
+          "00000008 08 09 0A 0B 0C 0D 0E 0F",
+          '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>'
+      )
     );
   });
 
