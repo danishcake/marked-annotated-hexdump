@@ -369,15 +369,16 @@ describe("this-extension", () => {
       "```annotated-hexdump\n" +
       "/highlight [8:A] /1\n" +
       "/width 8\n" +
-      "/baseaddress 17\n"
+      "/baseaddress 17\n" +
       "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
 
     expect(marked(markdown)).toBe(
       TOP_AND_TAIL_SVG(
-          "00000010    00 01 02 03 04 05 06\n" +
-          "00000018 07 08 09 0A 0B 0C 0D 0E\n" +
-          "00000020 0F                     "   +
-          '<rect width="8ch" height="1.2em" x="12ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>'
+          "00000010                      00\n" +
+          "00000018 01 02 03 04 05 06 07 08\n" +
+          "00000020 09 0A 0B 0C 0D 0E 0F   ",
+          '<rect width="2ch" height="1.2em" x="30ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>' +
+          '<rect width="5ch" height="1.2em" x="9ch" y="calc(1.2em * 2)" style="fill:#00ff00"/>'
       )
     );
   });

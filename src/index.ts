@@ -105,10 +105,12 @@ function processTokens(tokens: BaseToken[]): string {
     if (token instanceof SetBaseAddressCommand) {
       baseAddress = token.baseAddress;
     }
+  }
 
+  for (const token of tokens) {
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {
-        offset = token.offset;
+        offset = token.offset + baseAddress;
       }
 
       // Insert the actual data into the bytes array
@@ -174,8 +176,8 @@ function processTokens(tokens: BaseToken[]): string {
       for (const tk of highlightTokens) {
         for (const range of tk.ranges) {
           // If this range encompasses elements in this row, add a new rect
-          const lower = maxBigInt(range.start, startPosition);
-          const upper = minBigInt(range.end, endPosition);
+          const lower = maxBigInt(range.start + baseAddress, startPosition);
+          const upper = minBigInt(range.end + baseAddress, endPosition);
 
           // if there was some overlap, create the rectangle
           if (upper >= lower) {
