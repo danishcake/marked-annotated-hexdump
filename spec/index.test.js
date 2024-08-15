@@ -373,7 +373,19 @@ describe("this-extension", () => {
   });
 
   test("address width too small for address", () => {
+    const markdown ="```annotated-hexdump\n" +
+    "/awidth 2\n" +
+    "010000 00 01\n```";
+
     marked.use(annotatedHex());
-    // TODO: Test a small address width with a long address
+    expect(() => marked(markdown)).toThrow(Error);
+  });
+
+  test("no data", () => {
+    const markdown ="```annotated-hexdump\n" +
+    "010000\n```";
+
+    marked.use(annotatedHex());
+    expect(() => marked(markdown)).toThrow(Error);
   });
 });

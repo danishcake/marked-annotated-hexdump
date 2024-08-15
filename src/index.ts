@@ -81,7 +81,7 @@ function processTokens(tokens: BaseToken[]): string {
   let missingNo = "  ";
   let upperCase = true;
 
-  // Action the configuration tokens
+  // Action the tokens
   for (const token of tokens) {
     if (token instanceof SetWidthCommand) {
       lineWidth = token.width;
@@ -98,10 +98,7 @@ function processTokens(tokens: BaseToken[]): string {
     if (token instanceof SetMissingCharacterCommand) {
       missingNo = `${token.missing}${token.missing}`;
     }
-  }
 
-  // Extract the DataTokens
-  for (const token of tokens) {
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {
         offset = token.offset;
@@ -111,6 +108,16 @@ function processTokens(tokens: BaseToken[]): string {
       data.setBytes(offset, token.data);
       offset += token.data.byteLength;
     }
+  }
+
+  // Detect if address width is too small
+  if ((data.getEnd() - 1).toString(16).length > addressWidth) {
+    throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`)
+  }
+
+  // Detect no data
+  if (data.getOrigin() - data.getEnd() === 0) {
+    throw new Error("No hex data provided")
   }
 
   const highlightTokens: HighlightCommand[] = tokens.filter(
