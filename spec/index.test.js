@@ -356,6 +356,32 @@ describe("this-extension", () => {
     );
   });
 
+  test("baseaddress can be changed ", () => {
+    // GIVEN 16 bytes of data
+    // AND row width of 8
+    // AND /baseaddress set to 17
+    // AND /highlight set of bytes 8-10 inclusive
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    // AND the addresses are offset by 17
+    marked.use(annotatedHex());
+    const markdown =
+      "```annotated-hexdump\n" +
+      "/highlight [8:A] /1\n" +
+      "/width 8\n" +
+      "/baseaddress 17\n"
+      "0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```";
+
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+          "00000010    00 01 02 03 04 05 06\n" +
+          "00000018 07 08 09 0A 0B 0C 0D 0E\n" +
+          "00000020 0F                     "   +
+          '<rect width="8ch" height="1.2em" x="12ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>'
+      )
+    );
+  });
+
   test("code with different infostring", () => {
     marked.use(annotatedHex());
     const markdown = "```different\nABC\n```";
@@ -381,7 +407,7 @@ describe("this-extension", () => {
     expect(() => marked(markdown)).toThrow(Error);
   });
 
-  test("no data", () => {
+  test("no data is rejected", () => {
     const markdown ="```annotated-hexdump\n" +
     "010000\n```";
 

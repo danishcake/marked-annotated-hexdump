@@ -6,6 +6,7 @@ import {
   SetMissingCharacterCommand,
   HighlightCommand,
   SetAddressWidthCommand,
+  SetBaseAddressCommand,
 } from "../src/inputTokens.ts";
 
 describe("DataToken", () => {
@@ -14,9 +15,11 @@ describe("DataToken", () => {
   });
 
   test("hex offset is parsed to offset", () => {
-    expect(new DataToken("0000").offset).toEqual(0);
-    expect(new DataToken("123").offset).toEqual(0x123);
-    expect(new DataToken("123456789abcdef").offset).toEqual(0x123456789abcdef);
+    expect(new DataToken("0000").offset).toEqual(BigInt(0));
+    expect(new DataToken("123").offset).toEqual(BigInt(0x123));
+    expect(new DataToken("123456789abcdef").offset).toEqual(
+      BigInt("0x123456789abcdef")
+    );
   });
 
   test("missing offset results in undefined offset", () => {
@@ -170,21 +173,21 @@ describe("CommandToken", () => {
       const cmd = CommandToken.parseCommand("/highlight [0:1] x");
       expect(cmd).toBeInstanceOf(HighlightCommand);
       expect(cmd.format).toEqual("x");
-      expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
     });
 
     test("extracts format index", () => {
       const cmd = CommandToken.parseCommand("/highlight [0:1] /1");
       expect(cmd).toBeInstanceOf(HighlightCommand);
       expect(cmd.format).toEqual(1);
-      expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
     });
 
     test("allows extra whitespace", () => {
       const cmd = CommandToken.parseCommand("/highlight    [0:1]     x y");
       expect(cmd).toBeInstanceOf(HighlightCommand);
       expect(cmd.format).toEqual("x y");
-      expect(cmd.ranges[0]).toEqual({ start: 0, end: 1 });
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
     });
 
     test("rejects whitespace format", () => {
@@ -194,11 +197,15 @@ describe("CommandToken", () => {
     });
 
     test("rejects negative format index", () => {
-      expect(() => CommandToken.parseCommand("/highlight [0:1] /-1")).toThrow(Error);
+      expect(() => CommandToken.parseCommand("/highlight [0:1] /-1")).toThrow(
+        Error
+      );
     });
 
     test("rejects format index 16", () => {
-      expect(() => CommandToken.parseCommand("/highlight [0:1] /16")).toThrow(Error);
+      expect(() => CommandToken.parseCommand("/highlight [0:1] /16")).toThrow(
+        Error
+      );
     });
 
     test("rejects missing range", () => {
@@ -208,29 +215,29 @@ describe("CommandToken", () => {
     test("extracts single element ranges", () => {
       const cmd = CommandToken.parseCommand("/highlight [1] /0");
       expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(1), end: BigInt(1) });
     });
 
     test("extracts multiple single element ranges", () => {
       const cmd = CommandToken.parseCommand("/highlight [1,2,3] /0");
       expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
-      expect(cmd.ranges[1]).toEqual({start: 2, end: 2});
-      expect(cmd.ranges[2]).toEqual({start: 3, end: 3});
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(1), end: BigInt(1) });
+      expect(cmd.ranges[1]).toEqual({ start: BigInt(2), end: BigInt(2) });
+      expect(cmd.ranges[2]).toEqual({ start: BigInt(3), end: BigInt(3) });
     });
 
     test("extracts multiple span ranges", () => {
       const cmd = CommandToken.parseCommand("/highlight [1:2,4:5] /0");
       expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.ranges[0]).toEqual({start: 1, end: 2});
-      expect(cmd.ranges[1]).toEqual({start: 4, end: 5});
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(1), end: BigInt(2) });
+      expect(cmd.ranges[1]).toEqual({ start: BigInt(4), end: BigInt(5) });
     });
 
     test("extracts combined span and single element ranges", () => {
       const cmd = CommandToken.parseCommand("/highlight [1,4:5] /0");
       expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.ranges[0]).toEqual({start: 1, end: 1});
-      expect(cmd.ranges[1]).toEqual({start: 4, end: 5});
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(1), end: BigInt(1) });
+      expect(cmd.ranges[1]).toEqual({ start: BigInt(4), end: BigInt(5) });
     });
 
     test("rejects empty range", () => {
@@ -243,6 +250,46 @@ describe("CommandToken", () => {
       expect(() => CommandToken.parseCommand("/highlight [10:9] xx")).toThrow(
         Error
       );
+    });
+  });
+
+  describe("baseaddress command", () => {
+    test("accepts 0", () => {
+      const cmd = CommandToken.parseCommand("/baseaddress 0");
+      expect(cmd).toBeInstanceOf(SetBaseAddressCommand);
+      expect(cmd.baseAddress).toEqual(BigInt(0));
+    });
+
+    test("accepts hex", () => {
+      const cmd = CommandToken.parseCommand("/baseaddress ff");
+      expect(cmd).toBeInstanceOf(SetBaseAddressCommand);
+      expect(cmd.baseAddress).toEqual(BigInt(255));
+    });
+
+    test("accepts extra whitespace", () => {
+      const cmd = CommandToken.parseCommand("/baseaddress        ff");
+      expect(cmd).toBeInstanceOf(SetBaseAddressCommand);
+      expect(cmd.baseAddress).toEqual(BigInt(255));
+    });
+
+    test("accepts 2^64 - 1", () => {
+      const cmd = CommandToken.parseCommand("/baseaddress FFFFFFFFFFFFFFFF");
+      expect(cmd).toBeInstanceOf(SetBaseAddressCommand);
+      expect(cmd.baseAddress).toEqual(BigInt("0xFFFFFFFFFFFFFFFF"));
+    });
+
+    test("rejects -1", () => {
+      expect(() => CommandToken.parseCommand("/baseaddress -1")).toThrow(Error);
+    });
+
+    test("rejects 2^64", () => {
+      expect(() =>
+        CommandToken.parseCommand(`/baseaddress ${BigInt(0x10000000000000000)}`)
+      ).toThrow(Error);
+    });
+
+    test("requires argument", () => {
+      expect(() => CommandToken.parseCommand("/baseaddress")).toThrow(Error);
     });
   });
 });

@@ -9,7 +9,9 @@ import {
   SetCaseCommand,
   SetMissingCharacterCommand,
   HighlightCommand,
+  SetBaseAddressCommand,
 } from "./inputTokens";
+import { maxBigInt, minBigInt } from "./bigint";
 
 /**
  * Standard highlighting styles
@@ -76,10 +78,11 @@ function extractTokens(code: string): BaseToken[] {
 function processTokens(tokens: BaseToken[]): string {
   let lineWidth = 16;
   let addressWidth = 4; // Units are bytes, not characters
-  let offset = 0;
+  let offset = BigInt(0);
   let data = new SparseByteArray();
   let missingNo = "  ";
   let upperCase = true;
+  let baseAddress = BigInt(0);
 
   // Action the tokens
   for (const token of tokens) {
@@ -99,6 +102,10 @@ function processTokens(tokens: BaseToken[]): string {
       missingNo = `${token.missing}${token.missing}`;
     }
 
+    if (token instanceof SetBaseAddressCommand) {
+      baseAddress = token.baseAddress;
+    }
+
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {
         offset = token.offset;
@@ -106,17 +113,17 @@ function processTokens(tokens: BaseToken[]): string {
 
       // Insert the actual data into the bytes array
       data.setBytes(offset, token.data);
-      offset += token.data.byteLength;
+      offset += BigInt(token.data.byteLength);
     }
   }
 
   // Detect if address width is too small
-  if ((data.getEnd() - 1).toString(16).length > addressWidth) {
+  if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth) {
     throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`)
   }
 
   // Detect no data
-  if (data.getOrigin() - data.getEnd() === 0) {
+  if (data.getOrigin() - data.getEnd() === BigInt(0)) {
     throw new Error("No hex data provided")
   }
 
@@ -126,7 +133,7 @@ function processTokens(tokens: BaseToken[]): string {
 
   // Determine the address of the first line
   let position = data.getOrigin();
-  position = Math.floor(position / lineWidth) * lineWidth;
+  position = (position / BigInt(lineWidth)) * BigInt(lineWidth);
 
   // Build lines of data
   const highlightRects: string[] = [];
@@ -134,7 +141,9 @@ function processTokens(tokens: BaseToken[]): string {
   let lastRowWasBlank = false;
   while (position < data.getEnd()) {
     const startPosition = position;
-    const endPosition = startPosition + lineWidth - 1;
+    const endPosition = startPosition + BigInt(lineWidth - 1);
+
+    // Grab the row of bytes
     const cells: (number | null)[] = [];
     for (let column = 0; column < lineWidth; column++) {
       cells.push(data.getByte(position));
@@ -165,15 +174,15 @@ function processTokens(tokens: BaseToken[]): string {
       for (const tk of highlightTokens) {
         for (const range of tk.ranges) {
           // If this range encompasses elements in this row, add a new rect
-          const lower = Math.max(range.start, startPosition);
-          const upper = Math.min(range.end, endPosition);
+          const lower = maxBigInt(range.start, startPosition);
+          const upper = minBigInt(range.end, endPosition);
 
           // if there was some overlap, create the rectangle
           if (upper >= lower) {
             // Units are characters - ch in x and 1.2em in height
-            const x0 = addressWidth * 2 + 1 + (lower - startPosition) * 3;
+            const x0 = BigInt(addressWidth * 2 + 1) + (lower - startPosition) * BigInt(3);
             const y0 = lines.length - 1;
-            const w = (upper - lower + 1) * 3 - 1;
+            const w = (upper - lower + BigInt(1)) * BigInt(3) - BigInt(1);
 
             // Determine the style
             const style: string = (() => {

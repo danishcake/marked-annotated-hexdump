@@ -1,3 +1,5 @@
+import { parseBigIntHex } from "./bigint";
+
 export class BaseToken {}
 
 /**
@@ -5,7 +7,7 @@ export class BaseToken {}
  */
 export class DataToken extends BaseToken {
   // The base address of the bytes
-  offset?: number;
+  offset?: bigint;
   // The bytes
   data: ArrayBuffer;
 
@@ -24,10 +26,7 @@ export class DataToken extends BaseToken {
 
     const offsetMatch = /^([0-9a-fA-F]{3,16})/.exec(line);
     if (offsetMatch != null) {
-      this.offset = Number.parseInt(offsetMatch[1], 16);
-      if (Number.isNaN(this.offset)) {
-        throw new Error(`Unable to parse offset '${this.offset}'`);
-      }
+      this.offset = parseBigIntHex(offsetMatch[1]);
       // Trim the offset
       line = line.replace(/^([0-9a-fA-F]{3,16})/, "");
     }
@@ -82,6 +81,9 @@ export abstract class CommandToken extends BaseToken {
     }
     if (line.startsWith("/highlight")) {
       return new HighlightCommand(line);
+    }
+    if (line.startsWith("/baseaddress")) {
+      return new SetBaseAddressCommand(line);
     }
 
     throw new Error("Unrecognised command");
@@ -178,7 +180,7 @@ export class SetMissingCharacterCommand extends CommandToken {
  * Represents the /highlight command
  */
 export class HighlightCommand extends CommandToken {
-  ranges: { start: number; end: number }[];
+  ranges: { start: bigint; end: bigint }[];
   format: string | number;
 
   constructor(line: string) {
@@ -224,19 +226,14 @@ export class HighlightCommand extends CommandToken {
 
       // Extract the start/end of the range. You can specify a single byte
       // without the :end part, so detect that and reuse the start offset
-      const start = Number.parseInt(match[1], 16);
+      const start = parseBigIntHex(match[1]);
       const end = (() => {
         if (match[3] !== undefined) {
-          return Number.parseInt(match[3], 16);
+          return parseBigIntHex(match[3]);
         } else {
           return start;
         }
       })();
-
-      // Handle parsing errors, which we expect to be impossible
-      if (Number.isNaN(start) || Number.isNaN(end)) {
-        throw new Error(`Error parsing range '${range}' in line '${line}'`);
-      }
 
       // Handle negative length ranges
       if (start > end) {
@@ -244,6 +241,29 @@ export class HighlightCommand extends CommandToken {
       }
 
       this.ranges.push({ start, end });
+    }
+  }
+}
+
+/**
+ * Represents the /baseaddress command
+ */
+export class SetBaseAddressCommand extends CommandToken {
+  baseAddress: bigint;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/baseaddress +([0-9a-fA-F]+)$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.baseAddress = parseBigIntHex(match[1]);
+    if (this.baseAddress < BigInt(0) || this.baseAddress > BigInt(0xFFFFFFFFFFFFFFFF)) {
+      throw new Error(
+        `Base address must be in range 0-2^64-1", found '${this.baseAddress}'`
+      );
     }
   }
 }
