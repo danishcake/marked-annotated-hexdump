@@ -11,6 +11,7 @@
       "noEmitOnError": true,
       "lib": ["es2017"],
       "esModuleInterop": false,
+      "allowSyntheticDefaultImports": true
     },
     "include": ["src"]
   }

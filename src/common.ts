@@ -1,4 +1,3 @@
-import { Tokens } from 'marked';
 import { SparseByteArray } from './sparseByteArray';
 import {
   BaseToken,
@@ -40,7 +39,7 @@ const STANDARD_STYLES: string[] = [
  * @param code Input code, stripped of infostring
  * @returns An array of tokens to process
  */
-function extractTokens(code: string): BaseToken[] {
+export function extractTokens(code: string): BaseToken[] {
   // Now parse the input, build the hex output, and output the result
   const lines = code.split(/\r?\n/);
   const tokens: BaseToken[] = [];
@@ -75,7 +74,7 @@ function extractTokens(code: string): BaseToken[] {
  * @param tokens Sequence of tokens to process
  * @returns HTML for the hexdump
  */
-function processTokens(tokens: BaseToken[]): string {
+export function processTokens(tokens: BaseToken[]): string {
   let lineWidth = 16;
   let addressWidth = 4; // Units are bytes, not characters
   let offset = BigInt(0);
@@ -196,7 +195,7 @@ function processTokens(tokens: BaseToken[]): string {
             })();
 
             highlightRects.push(
-              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="calc(1.2em * ${y0})" style="${style}"/>`,
+              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0 * 1.2}em" style="${style}"/>`,
             );
           }
         }
@@ -223,25 +222,3 @@ function processTokens(tokens: BaseToken[]): string {
     .join('\n')}</code>${svg}</pre>`;
 }
 
-export function annotatedHex() {
-  return {
-    renderer: {
-      code: (code: Tokens.Code | string, infostring: string | undefined) => {
-        // More modern versions of markedjs use an object here
-        /* istanbul ignore next */
-        if (typeof code === 'object') {
-          infostring = code.lang;
-          code = code.text;
-        }
-
-        if (infostring !== 'annotated-hexdump') {
-          /* istanbul ignore next */
-          return false;
-        }
-
-        const tokens = extractTokens(code);
-        return processTokens(tokens);
-      },
-    },
-  };
-}

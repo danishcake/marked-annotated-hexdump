@@ -1,17 +1,8 @@
 import { marked } from 'marked';
-import { annotatedHex } from '../src/index.ts';
+import { annotatedHex } from '../src/marked.ts';
+import { TOP_AND_TAIL, TOP_AND_TAIL_SVG } from './helper.ts'
 
-const PRE_CODE =
-  "<pre style=\"display: grid; grid-template: 'container';\">"
-  + '<code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">';
-const POST_CODE = '</code></pre>';
-const PRE_SVG =
-  '<code style="z-index:1; visibility: hidden; grid-area: container;"><svg style="opacity: 0.3; visibility: visible; width: 100%; height: 100%;" xmlns="http://www.w3.oprg/2000/svg">';
-const TOP_AND_TAIL = (data) => `${PRE_CODE}${data}${POST_CODE}`;
-const TOP_AND_TAIL_SVG = (data, svg) =>
-  `${PRE_CODE}${data}</code>${PRE_SVG}${svg}</svg>${POST_CODE}`;
-
-describe('this-extension', () => {
+describe('marked-extension', () => {
   beforeEach(() => {
     marked.setOptions(marked.getDefaults());
   });
@@ -305,7 +296,7 @@ describe('this-extension', () => {
     expect(marked(markdown)).toBe(
       TOP_AND_TAIL_SVG(
         '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      ',
-        '<rect width="11ch" height="1.2em" x="21ch" y="calc(1.2em * 0)" style="fill:#00ff00"/>',
+        '<rect width="11ch" height="1.2em" x="21ch" y="0em" style="fill:#00ff00"/>',
       ),
     );
   });
@@ -327,7 +318,7 @@ describe('this-extension', () => {
       TOP_AND_TAIL_SVG(
         '00000000 00 01 02 03 04 05 06 07\n'
           + '00000008 08 09 0A 0B 0C 0D 0E 0F',
-        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>',
+        '<rect width="8ch" height="1.2em" x="9ch" y="1.2em" style="fill:#00ff00"/>',
       ),
     );
   });
@@ -349,7 +340,7 @@ describe('this-extension', () => {
       TOP_AND_TAIL_SVG(
         '00000000 00 01 02 03 04 05 06 07\n'
           + '00000008 08 09 0A 0B 0C 0D 0E 0F',
-        '<rect width="8ch" height="1.2em" x="9ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>',
+        '<rect width="8ch" height="1.2em" x="9ch" y="1.2em" style="fill:#00ff00"/>',
       ),
     );
   });
@@ -375,8 +366,8 @@ describe('this-extension', () => {
         '00000010                      00\n'
           + '00000018 01 02 03 04 05 06 07 08\n'
           + '00000020 09 0A 0B 0C 0D 0E 0F   ',
-        '<rect width="2ch" height="1.2em" x="30ch" y="calc(1.2em * 1)" style="fill:#00ff00"/>'
-          + '<rect width="5ch" height="1.2em" x="9ch" y="calc(1.2em * 2)" style="fill:#00ff00"/>',
+        '<rect width="2ch" height="1.2em" x="30ch" y="1.2em" style="fill:#00ff00"/>'
+          + '<rect width="5ch" height="1.2em" x="9ch" y="2.4em" style="fill:#00ff00"/>',
       ),
     );
   });

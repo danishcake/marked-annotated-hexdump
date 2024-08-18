@@ -3,10 +3,10 @@ import commonjs from '@rollup/plugin-commonjs';
 
 export default [
   {
-    input: 'src/index.ts',
+    input: 'src/marked.ts',
     output: {
       name: 'marked-annotated-hexdump',
-      file: 'lib/index.umd.js',
+      file: 'lib/marked.umd.js',
       format: 'umd',
       globals: {
         marked: 'marked',
@@ -17,9 +17,9 @@ export default [
     plugins: [typescript()],
   },
   {
-    input: 'src/index.ts',
+    input: 'src/marked.ts',
     output: {
-      file: 'lib/index.cjs',
+      file: 'lib/marked.cjs',
       format: 'cjs',
       sourcemap: true,
     },
@@ -27,10 +27,43 @@ export default [
     plugins: [typescript()],
   },
   {
-    input: 'example/index.js',
+    input: 'src/markdown-it.ts',
+    output: {
+      name: 'markdownit-annotated-hexdump',
+      file: 'lib/markdown-it.umd.js',
+      format: 'umd',
+      globals: {
+        marked: 'markdownit ',
+      },
+      sourcemap: true,
+    },
+    external: ['markdownit'],
+    plugins: [typescript()],
+  },
+  {
+    input: 'src/markdown-it.ts',
+    output: {
+      file: 'lib/markdown-it.cjs',
+      format: 'cjs',
+      sourcemap: true,
+    },
+    external: ['markdownit'],
+    plugins: [typescript()],
+  },
+  {
+    input: 'example/marked/index.js',
     output: {
       name: 'example',
-      file: 'example/dist/index.umd.js',
+      file: 'example/marked/dist/index.umd.js',
+      format: 'umd',
+    },
+    plugins: [commonjs()],
+  },
+  {
+    input: 'example/markdown-it/index.js',
+    output: {
+      name: 'example',
+      file: 'example/markdown-it/dist/index.umd.js',
       format: 'umd',
     },
     plugins: [commonjs()],

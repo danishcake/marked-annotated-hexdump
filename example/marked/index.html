@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Annotated Hexdump example</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+  <script src="./dist/index.umd.js"></script>
+  <script>
+    window.onload = () => window['example'].formatMarkdown();
+  </script>
+
+  <div class="container">
+    <textarea class="input" id="input" oninput="window['example'].formatMarkdown()">
+# Annotated hexdumps
+See [the source code](https://github.com/danishcake/marked-annotated-hexdump)
+```annotated-hexdump
+# Define the data
+0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 1E 1F
+0010 10 11 12 13 14 15 16 17 18 19 1A 1B
+0020 20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F
+
+# Define the case. It defaults to upper, but we could also set 'lower'
+/case upper
+
+# Define the character to show for missing bytes
+# This defaults to ' '
+/missing ?
+
+# Define the width of the hexdump in bytes. This defaults to 16, but you
+# can use any value between 2 and 32
+/width 6
+
+# Define the address width of the hexdump in bytes. This defaults to 4, but you can
+# you any value between 2 and 8
+/awidth 2
+
+# Set the base address. All addresses in the output are increased
+# by this value
+/baseaddress 12
+
+# Define some highlighted regions
+/highlight [0,1,2] /0
+/highlight [4:7] /1
+/highlight [20:25] /2
+```
+    </textarea>
+    <div class="output" id="output"></div>
+    <div class="error" id="error">OK</div>
+  </div>
+</body>
+
+</html>
