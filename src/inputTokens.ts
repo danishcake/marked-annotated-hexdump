@@ -81,6 +81,9 @@ export abstract class CommandToken extends BaseToken {
     if (line.startsWith('/baseaddress')) {
       return new SetBaseAddressCommand(line);
     }
+    if (line.startsWith('/note')) {
+      return new NoteCommand(line);
+    }
 
     throw new Error('Unrecognised command');
   }
@@ -177,12 +180,12 @@ export class SetMissingCharacterCommand extends CommandToken {
  */
 export class HighlightCommand extends CommandToken {
   ranges: { start: bigint; end: bigint }[];
-  format: string | number;
+  format: number;
 
   constructor(line: string) {
     super();
 
-    const match = /^\/highlight +\[([0-9a-fA-F:,]+)\] +(.+)$/.exec(line);
+    const match = /^\/highlight +\[([0-9a-fA-F:,]+)\] +\/(.+)$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -194,22 +197,17 @@ export class HighlightCommand extends CommandToken {
       throw new Error(`Missing or blank format in '${line}'`);
     }
 
-    // Extract /1 to /16 styles
-    if (format.startsWith('/')) {
-      const formatIndex = Number.parseInt(format.slice(1));
-      if (Number.isNaN(formatIndex)) {
-        throw new Error(`Format starting with / was not a number in '${line}'`);
-      }
-      if (formatIndex < 0 || formatIndex > 15) {
-        throw new Error(
-          `Format index '${formatIndex}' outside valid range 0-15 in line '${line}'`,
-        );
-      }
-      this.format = formatIndex;
-    } else {
-      // If it doesn't start with a forward slash, store verbatim
-      this.format = match[2].trim();
+    // Extract /0 to /15 styles
+    const formatIndex = Number.parseInt(format);
+    if (Number.isNaN(formatIndex)) {
+      throw new Error(`Format starting with / was not a number in '${line}'`);
     }
+    if (formatIndex < 0 || formatIndex > 15) {
+      throw new Error(
+        `Format index '${formatIndex}' outside valid range 0-15 in line '${line}'`,
+      );
+    }
+    this.format = formatIndex;
 
     // Now parse the ranges. These will be expressed as a series ranges, separated with commas
     this.ranges = [];
@@ -261,5 +259,31 @@ export class SetBaseAddressCommand extends CommandToken {
         `Base address must be in range 0-2^64-1", found '${this.baseAddress}'`,
       );
     }
+  }
+}
+
+/**
+ * Represents the /note command
+ */
+export class NoteCommand extends CommandToken {
+  format: number;
+  text: string;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/note +\/([0-9]+) +(.+)$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.format = Number.parseInt(match[1]);
+    if (this.format < 0 || this.format > 15) {
+      throw new Error(
+        `Note format must be in range 0-15, found '${this.format}'`,
+      );
+    }
+
+    this.text = match[2].trim();
   }
 }

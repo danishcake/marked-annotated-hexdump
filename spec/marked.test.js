@@ -404,4 +404,47 @@ describe('marked-extension', () => {
     marked.use(annotatedHex());
     expect(() => marked(markdown)).toThrow(Error);
   });
+
+  test('note is highlighted ', () => {
+    // GIVEN 16 bytes of data
+    // AND a note with style 1
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    // AND the note is at the bottom after a blank line
+    marked.use(annotatedHex());
+    const markdown =
+      '```annotated-hexdump\n'
+      + '0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n'
+      + '/note /1 POWER OVERWHELMING\n```';
+
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+        '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n'
+        + '\n'
+        + 'POWER OVERWHELMING',
+        '<rect width="18ch" height="1.2em" x="0ch" y="2.4em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
+
+  test('note does not have case corrected ', () => {
+    // GIVEN 16 bytes of data
+    // AND a note with style 1
+    // WHEN the markdown is rendered
+    // THEN the note is in the original case
+    marked.use(annotatedHex());
+    const markdown =
+      '```annotated-hexdump\n'
+      + '0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n'
+      + '/note /1 Sally Shears\n```';
+
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+        '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n'
+        + '\n'
+        + 'Sally Shears',
+        '<rect width="12ch" height="1.2em" x="0ch" y="2.4em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
 });
