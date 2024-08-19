@@ -1,13 +1,13 @@
 {
   "name": "marked-annotated-hexdump",
-  "version": "0.0.0",
-  "description": "Create annotated hexdumps in markdown using markedjs",
-  "main": "./lib/index.cjs",
-  "module": "./src/index.js",
-  "browser": "./lib/index.umd.js",
+  "version": "1.0.0",
+  "description": "Create annotated hexdumps in markdown using markedjs or markdown-it",
   "type": "module",
   "keywords": [
     "marked",
+    "markdown-it",
+    "hexdump",
+    "hex",
     "extension"
   ],
   "files": [
@@ -15,9 +15,15 @@
     "src/"
   ],
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./lib/index.cjs"
+    "./marked": {
+      "import": "./lib/marked.mjs",
+      "require": "./lib/marked.cjs",
+      "script": "./lib/marked.umd.js"
+    },
+    "./markdown-it": {
+      "import": "./lib/markdown-it.mjs",
+      "require": "./lib/markdown-it.cjs",
+      "script": "./lib/markdown-it.umd.js"
     }
   },
   "scripts": {
@@ -39,7 +45,15 @@
   "homepage": "https://github.com/danishcake/marked-annotated-hexdump#readme",
   "peerDependencies": {
     "markdown-it": ">=14 <15",
-    "marked": ">=14 <15"
+    "marked": ">=4 <15"
+  },
+  "peerDependenciesMeta": {
+    "markdown-it": {
+      "optional": true
+    },
+    "marked": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

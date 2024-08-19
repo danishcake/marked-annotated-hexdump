@@ -8,12 +8,8 @@ export default [
       name: 'marked-annotated-hexdump',
       file: 'lib/marked.umd.js',
       format: 'umd',
-      globals: {
-        marked: 'marked',
-      },
       sourcemap: true,
     },
-    external: ['marked'],
     plugins: [typescript()],
   },
   {
@@ -23,7 +19,15 @@ export default [
       format: 'cjs',
       sourcemap: true,
     },
-    external: ['marked'],
+    plugins: [typescript()],
+  },
+  {
+    input: 'src/marked.ts',
+    output: {
+      file: 'lib/marked.mjs',
+      format: 'esm',
+      sourcemap: true,
+    },
     plugins: [typescript()],
   },
   {
@@ -32,12 +36,8 @@ export default [
       name: 'markdownit-annotated-hexdump',
       file: 'lib/markdown-it.umd.js',
       format: 'umd',
-      globals: {
-        marked: 'markdownit ',
-      },
       sourcemap: true,
     },
-    external: ['markdownit'],
     plugins: [typescript()],
   },
   {
@@ -47,7 +47,15 @@ export default [
       format: 'cjs',
       sourcemap: true,
     },
-    external: ['markdownit'],
+    plugins: [typescript()],
+  },
+  {
+    input: 'src/markdown-it.ts',
+    output: {
+      file: 'lib/markdown-it.mjs',
+      format: 'esm',
+      sourcemap: true,
+    },
     plugins: [typescript()],
   },
   {
