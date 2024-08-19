@@ -211,7 +211,7 @@ export function processTokens(tokens: BaseToken[]): string {
     // inherits the correct fonts
     return (
       '<code style="z-index:1; visibility: hidden; grid-area: container;">'
-      + '<svg style="opacity: 0.3; visibility: visible; width: 100%; height: 100%;" xmlns="http://www.w3.oprg/2000/svg">'
+      + `<svg style="opacity: 0.3; visibility: visible; width: 100%; height: ${lines.length * 1.2}em;" xmlns="http://www.w3.oprg/2000/svg">`
       + highlightRects.join('')
       + '</svg></code>'
     );

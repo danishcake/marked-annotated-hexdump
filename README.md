@@ -1,6 +1,5 @@
 # TODO:
 
--   [ ] Provide usage documentation, including examples and screenshots in `/README.md`
 -   [ ] Uncomment release in `/.github/workflows/main.yml`
 
 # marked-annotated-hexdump
