@@ -9,6 +9,7 @@ import {
   SetMissingCharacterCommand,
   HighlightCommand,
   SetBaseAddressCommand,
+  NoteCommand,
 } from './inputTokens';
 import { maxBigInt, minBigInt } from './bigint';
 
@@ -184,15 +185,7 @@ export function processTokens(tokens: BaseToken[]): string {
             const x0 = BigInt(addressWidth * 2 + 1) + (lower - startPosition) * BigInt(3);
             const y0 = lines.length - 1;
             const w = (upper - lower + BigInt(1)) * BigInt(3) - BigInt(1);
-
-            // Determine the style
-            const style: string = (() => {
-              if (typeof tk.format === 'number') {
-                return STANDARD_STYLES[tk.format];
-              } else {
-                return tk.format;
-              }
-            })();
+            const style = STANDARD_STYLES[tk.format];
 
             highlightRects.push(
               `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0 * 1.2}em" style="${style}"/>`,
@@ -201,6 +194,29 @@ export function processTokens(tokens: BaseToken[]): string {
         }
       }
     }
+  }
+
+  // Normalise case
+  for (let i = 0; i < lines.length; i++) {
+    lines[i] = upperCase ? lines[i].toUpperCase() : lines[i].toLowerCase();
+  }
+
+  // Add notes
+  const noteTokens: NoteCommand[] = tokens.filter(
+    (p) => p instanceof NoteCommand,
+  ) as NoteCommand[];
+
+  if (noteTokens.length !== 0) {
+    lines.push('');
+  }
+
+  for (const nk of noteTokens) {
+    lines.push(nk.text);
+    const y0 = lines.length - 1;
+    const w = nk.text.length;
+    const style = STANDARD_STYLES[nk.format];
+
+    highlightRects.push(`<rect width="${w}ch" height="1.2em" x="0ch" y="${y0 * 1.2}em" style="${style}"/>`);
   }
 
   const svg = (() => {
@@ -217,7 +233,5 @@ export function processTokens(tokens: BaseToken[]): string {
     );
   })();
 
-  return `<pre style="display: grid; grid-template: 'container';"><code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">${lines
-    .map((p) => (upperCase ? p.toUpperCase() : p.toLowerCase()))
-    .join('\n')}</code>${svg}</pre>`;
+  return `<pre style="display: grid; grid-template: 'container';"><code class="language-annotated-hexdump" style="grid-area: container; line-height: 1.2;">${lines.join('\n')}</code>${svg}</pre>`;
 }

@@ -7,6 +7,7 @@ import {
   HighlightCommand,
   SetAddressWidthCommand,
   SetBaseAddressCommand,
+  NoteCommand,
 } from '../src/inputTokens.ts';
 
 describe('DataToken', () => {
@@ -169,11 +170,8 @@ describe('CommandToken', () => {
   });
 
   describe('highlight command', () => {
-    test('accepts any format', () => {
-      const cmd = CommandToken.parseCommand('/highlight [0:1] x');
-      expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.format).toEqual('x');
-      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
+    test('rejects non-numeric format', () => {
+      expect(() => CommandToken.parseCommand('/highlight [0:1] x')).toThrow(Error);
     });
 
     test('extracts format index', () => {
@@ -184,9 +182,9 @@ describe('CommandToken', () => {
     });
 
     test('allows extra whitespace', () => {
-      const cmd = CommandToken.parseCommand('/highlight    [0:1]     x y');
+      const cmd = CommandToken.parseCommand('/highlight    [0:1]     /1');
       expect(cmd).toBeInstanceOf(HighlightCommand);
-      expect(cmd.format).toEqual('x y');
+      expect(cmd.format).toEqual(1);
       expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
     });
 
@@ -241,7 +239,7 @@ describe('CommandToken', () => {
     });
 
     test('rejects empty range', () => {
-      expect(() => CommandToken.parseCommand('/highlight [] xx')).toThrow(
+      expect(() => CommandToken.parseCommand('/highlight [] /1')).toThrow(
         Error,
       );
     });
@@ -290,6 +288,46 @@ describe('CommandToken', () => {
 
     test('requires argument', () => {
       expect(() => CommandToken.parseCommand('/baseaddress')).toThrow(Error);
+    });
+  });
+
+  describe('/note command', () => {
+    test('accepts /0 through /15', () => {
+      for (let i = 0; i < 16; i++) {
+        const cmd = CommandToken.parseCommand(`/note /${i} text`);
+        expect(cmd).toBeInstanceOf(NoteCommand);
+        expect(cmd.format).toEqual(i);
+        expect(cmd.text).toEqual('text');
+      }
+    });
+
+    test('accepts extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/note   /1   text');
+      expect(cmd).toBeInstanceOf(NoteCommand);
+      expect(cmd.format).toEqual(1);
+      expect(cmd.text).toEqual('text');
+    });
+
+    test('rejects -1 format', () => {
+      expect(() => CommandToken.parseCommand('/note /-1 text')).toThrow(Error);
+    });
+
+    test('rejects 16 format', () => {
+      expect(() => CommandToken.parseCommand('/note /16 text')).toThrow(Error);
+    });
+
+    test('rejects missing text', () => {
+      expect(() => CommandToken.parseCommand('/note /16 ')).toThrow(Error);
+    });
+
+    test('rejects purely whitespace text', () => {
+      expect(() => CommandToken.parseCommand('/note /16      ')).toThrow(Error);
+    });
+
+    test('text is trimmed', () => {
+      const cmd = CommandToken.parseCommand('/note /1 text   ');
+      expect(cmd).toBeInstanceOf(NoteCommand);
+      expect(cmd.text).toEqual('text');
     });
   });
 });

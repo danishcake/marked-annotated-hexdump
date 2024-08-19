@@ -76,12 +76,13 @@ The width of the data and address elements in the hexdump can be controlled with
 ![](./.img/Example5.png)
 
 You can highlight regions of a hexdump with `/highlight`. This takes two arguments:
-* An inclusive range of addresses to highlight. This is enclosed in square brackets `[]`, and can contain single addresses, or ranges delimited with a colon. Multiple ranges (or single addresses) can be combined with commas.
-    * `[1]` - defines a address 0x01 only
-    * `[1,2,3]` - defines a highlight over 0x01, 0x02 and 0x03. This will be rendered with gaps between the highlights.
-    * `[1:3]` - defines a contiguous highlight over the same three bytes.
-    * `[1:3, 100:200]` - defines two contiguous highlights.
-* A style in the form `/N`, where N is a number between 0 and 15.
+
+-   An inclusive range of addresses to highlight. This is enclosed in square brackets `[]`, and can contain single addresses, or ranges delimited with a colon. Multiple ranges (or single addresses) can be combined with commas.
+    -   `[1]` - defines a address 0x01 only
+    -   `[1,2,3]` - defines a highlight over 0x01, 0x02 and 0x03. This will be rendered with gaps between the highlights.
+    -   `[1:3]` - defines a contiguous highlight over the same three bytes.
+    -   `[1:3, 100:200]` - defines two contiguous highlights.
+-   A style in the form `/N`, where N is a number between 0 and 15.
 
 ````markdown
 ```annotated-hexdump
@@ -97,6 +98,7 @@ You can highlight regions of a hexdump with `/highlight`. This takes two argumen
 
 ![](./.img/Example6.png)
 
+You can leave comments by starting a line with `#`. This only works if it's the first character in a line.
 
 ## Usage with marked
 
@@ -124,3 +126,8 @@ extendMarkdownIt(md);
 
 md.render("```annotated-hexdump\nAA BB CC DD\n```");
 ````
+
+# Limitations
+
+-   If you configure your markdown to wrap, the highlighted regions will be at incorrect positions.<br>
+    This might be better expressed using spans rather than an svg overlay
