@@ -221,4 +221,3 @@ export function processTokens(tokens: BaseToken[]): string {
     .map((p) => (upperCase ? p.toUpperCase() : p.toLowerCase()))
     .join('\n')}</code>${svg}</pre>`;
 }
-

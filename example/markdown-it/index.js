@@ -1,9 +1,8 @@
 import { extendMarkdownIt } from '../../lib/markdown-it.cjs';
-import markdownIt from '../../node_modules/markdown-it/dist/markdown-it'
+import markdownIt from '../../node_modules/markdown-it/dist/markdown-it';
 
-const md = markdownIt()
+const md = markdownIt();
 extendMarkdownIt(md);
-
 
 /**
  * Formats the markdown in the input element

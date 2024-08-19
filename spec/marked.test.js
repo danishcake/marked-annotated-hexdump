@@ -1,6 +1,6 @@
 import { marked } from 'marked';
 import { annotatedHex } from '../src/marked.ts';
-import { TOP_AND_TAIL, TOP_AND_TAIL_SVG } from './helper.ts'
+import { TOP_AND_TAIL, TOP_AND_TAIL_SVG } from './helper.ts';
 
 describe('marked-extension', () => {
   beforeEach(() => {
