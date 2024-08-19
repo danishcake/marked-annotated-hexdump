@@ -1,7 +1,3 @@
-# TODO:
-
--   [ ] Uncomment release in `/.github/workflows/main.yml`
-
 # marked-annotated-hexdump
 
 Generate annotated hexdumps using markdown. Supports marked and markdown-it
