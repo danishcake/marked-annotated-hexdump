@@ -1,7 +1,8 @@
-import { annotatedHex } from '../lib/index.cjs';
-import { marked } from '../node_modules/marked/lib/marked.cjs';
+import { extendMarkdownIt } from '../../lib/markdown-it.cjs';
+import markdownIt from '../../node_modules/markdown-it/dist/markdown-it';
 
-marked.use(annotatedHex());
+const md = markdownIt();
+extendMarkdownIt(md);
 
 /**
  * Formats the markdown in the input element
@@ -13,7 +14,7 @@ export function formatMarkdown() {
   const errorElement = document.getElementById('error');
 
   try {
-    outputElement.innerHTML = marked.parse(inputElement.value);
+    outputElement.innerHTML = md.render(inputElement.value);
     outputElement.classList.remove('output-with-error');
     errorElement.innerHTML = 'OK';
   } catch (error) {
