@@ -100,6 +100,13 @@ You can highlight regions of a hexdump with `/highlight`. This takes two argumen
 
 You can leave comments by starting a line with `#`. This only works if it's the first character in a line.
 
+You can leave visible notes with the `/note` command. This takes two arguments:
+
+-   A style in the form of `/N`, where N is a number between 0 and 15.
+-   A block of text, which will be formatted in this style.
+
+![](./.img/Example7.png)
+
 ## Usage with marked
 
 ````js
