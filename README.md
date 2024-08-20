@@ -134,3 +134,17 @@ md.render("```annotated-hexdump\nAA BB CC DD\n```");
 
 -   If you configure your markdown to wrap, the highlighted regions will be at incorrect positions.<br>
     This might be better expressed using spans rather than an svg overlay
+
+# Contributing guide
+
+Releases are generated using Semantic Release[](https://semantic-release.gitbook.io/semantic-release), so it's important to use Angular comments. In particular, start the commit message with:
+
+| Prefix                      | Example                                                        | Version change |
+| --------------------------- | -------------------------------------------------------------- | -------------- |
+| fix:                        | fix: Fix output                                                | 0.0.1          |
+| feat:                       | feat: Add /x command                                           | 0.1.0          |
+| any<br><br>BREAKING CHANGE: | fix: Improve quality<br><br>BREAKING CHANGE: Remove /x command | 1.0.0          |
+
+Where `any` is one of `[fix,feat,build,ci,docs,perf,refactor]`
+
+Write the summary in the present tense (fix not fixed).

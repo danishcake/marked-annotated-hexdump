@@ -53,7 +53,7 @@ export function extractTokens(code: string): BaseToken[] {
     }
 
     // If it starts with numbers and consists of only numbers, store as an extent of data
-    if (/^[0-9]/.test(line)) {
+    if (/^[0-9a-fA-F]/.test(line)) {
       tokens.push(new DataToken(line));
       continue;
     }

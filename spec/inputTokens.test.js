@@ -26,6 +26,7 @@ describe('DataToken', () => {
   test('missing offset results in undefined offset', () => {
     expect(new DataToken('11 22').offset).toEqual(undefined);
     expect(new DataToken('22').offset).toEqual(undefined);
+    expect(new DataToken('AA BB').offset).toEqual(undefined);
   });
 
   test('additional whitespace is ignored', () => {
