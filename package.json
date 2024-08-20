@@ -16,14 +16,32 @@
   ],
   "exports": {
     "./marked": {
-      "import": "./lib/marked.mjs",
-      "require": "./lib/marked.cjs",
-      "script": "./lib/marked.umd.js"
+      "import": {
+        "default": "./lib/marked.mjs",
+        "types": "./lib/marked.d.ts"
+      },
+      "require": {
+        "default": "./lib/marked.cjs",
+        "types": "./lib/marked.d.ts"
+      },
+      "script": {
+        "default": "./lib/marked.umd.js",
+        "types": "./lib/marked.d.ts"
+      }
     },
     "./markdown-it": {
-      "import": "./lib/markdown-it.mjs",
-      "require": "./lib/markdown-it.cjs",
-      "script": "./lib/markdown-it.umd.js"
+      "import": {
+        "default": "./lib/markdown-it.mjs",
+        "types": "./lib/markdown-it.d.ts"
+      },
+      "require": {
+        "default": "./lib/markdown-it.cjs",
+        "types": "./lib/markdown-it.d.ts"
+      },
+      "script": {
+        "default": "./lib/markdown-it.umd.js",
+        "types": "./lib/markdown-it.d.ts"
+      }
     }
   },
   "scripts": {

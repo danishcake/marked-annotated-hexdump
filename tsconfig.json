@@ -4,7 +4,7 @@
       "removeComments": false,
       "sourceMap": true,
       "target": "es2018",
-      "outDir": "build/compiled",
+      "outDir": ".",
       "declaration": true,
       "strict": true,
       "module": "esnext",
@@ -13,5 +13,6 @@
       "esModuleInterop": false,
       "allowSyntheticDefaultImports": true
     },
-    "include": ["src"]
+    "include": ["src"],
+    "exclude": []
   }
