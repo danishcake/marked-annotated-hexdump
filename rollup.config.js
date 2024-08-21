@@ -1,5 +1,8 @@
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+
+const plugins = [typescript(), commonjs(), nodeResolve()];
 
 export default [
   {
@@ -10,7 +13,7 @@ export default [
       format: 'umd',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'src/marked.ts',
@@ -19,7 +22,7 @@ export default [
       format: 'cjs',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'src/marked.ts',
@@ -28,7 +31,7 @@ export default [
       format: 'esm',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'src/markdown-it.ts',
@@ -38,7 +41,7 @@ export default [
       format: 'umd',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'src/markdown-it.ts',
@@ -47,7 +50,7 @@ export default [
       format: 'cjs',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'src/markdown-it.ts',
@@ -56,7 +59,7 @@ export default [
       format: 'esm',
       sourcemap: true,
     },
-    plugins: [typescript()],
+    plugins,
   },
   {
     input: 'example/marked/index.js',
@@ -65,7 +68,7 @@ export default [
       file: 'example/marked/dist/index.umd.js',
       format: 'umd',
     },
-    plugins: [commonjs()],
+    plugins,
   },
   {
     input: 'example/markdown-it/index.js',
@@ -74,6 +77,6 @@ export default [
       file: 'example/markdown-it/dist/index.umd.js',
       format: 'umd',
     },
-    plugins: [commonjs()],
+    plugins,
   },
 ];

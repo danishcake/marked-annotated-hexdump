@@ -456,4 +456,10 @@ describe('marked-extension', () => {
       ),
     );
   });
+
+  test('non-strict mode reports errors', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n0 00 01 02 03\n```';
+    expect(marked(markdown)).toBe('<pre><code class="language-annotated-hexdump">0 00 01 02 03\n\nError: Uneven number of bytes found</code></pre>\n');
+  });
 });
