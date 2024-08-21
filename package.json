@@ -1,6 +1,6 @@
 {
   "name": "marked-annotated-hexdump",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Create annotated hexdumps in markdown using markedjs or markdown-it",
   "type": "module",
   "keywords": [
