@@ -397,6 +397,15 @@ describe('marked-extension', () => {
     expect(() => marked(markdown)).toThrow(Error);
   });
 
+  test('address width OK for short address', () => {
+    const markdown = '```annotated-hexdump\n'
+    + '/awidth 2\n'
+    + '000f00 00 01\n```';
+
+    marked.use(annotatedHex());
+    expect(() => marked(markdown)).not.toThrow(Error);
+  });
+
   test('no data is rejected', () => {
     const markdown = '```annotated-hexdump\n'
     + '010000\n```';
