@@ -52,16 +52,23 @@ describe('markdown-it-extension', () => {
     expect(() => md.render(markdown)).toThrow(Error);
   });
 
-  test('non-strict mode reports errors', () => {
+  test('non-strict mode reports errors with annotatedHex', () => {
     const md = markdownIt();
     md.use(annotatedHex, { strict: false });
     const markdown = '```annotated-hexdump\n0 00 01 02 03\n```';
     expect(md.render(markdown)).toBe('<pre><code class="language-annotated-hexdump">0 00 01 02 03\n\nError: Uneven number of bytes found</code></pre>\n');
   });
 
-  test('non-strict mode reports errors', () => {
+  test('non-strict mode reports errors with use extendMarkdownIt', () => {
     const md = markdownIt();
     md.use(extendMarkdownIt, { strict: false });
+    const markdown = '```annotated-hexdump\n0 00 01 02 03\n```';
+    expect(md.render(markdown)).toBe('<pre><code class="language-annotated-hexdump">0 00 01 02 03\n\nError: Uneven number of bytes found</code></pre>\n');
+  });
+
+  test('non-strict mode reports errors with extendMarkdownIt call', () => {
+    const md = markdownIt();
+    extendMarkdownIt(md, { strict: false });
     const markdown = '```annotated-hexdump\n0 00 01 02 03\n```';
     expect(md.render(markdown)).toBe('<pre><code class="language-annotated-hexdump">0 00 01 02 03\n\nError: Uneven number of bytes found</code></pre>\n');
   });
