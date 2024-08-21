@@ -20,7 +20,7 @@ const defaultConfig: MarkedHexdumpConfig = {
   strict: true,
 };
 
-export function annotatedHex(config: MarkedHexdumpConfig | undefined) {
+export function annotatedHex(config?: MarkedHexdumpConfig) {
   // Merge options
   config = { ...defaultConfig, ...(config || {}) };
 
