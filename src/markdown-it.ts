@@ -29,7 +29,7 @@ const defaultConfig: MarkdownItHexdumpConfig = {
  */
 export function extendMarkdownIt(
   md: MarkdownIt,
-  config: MarkdownItHexdumpConfig | undefined,
+  config?: MarkdownItHexdumpConfig,
 ) {
   // Merge options
   config = { ...defaultConfig, ...(config || {}) };
@@ -66,7 +66,7 @@ export function extendMarkdownIt(
  */
 export function annotatedHex(
   md: MarkdownIt,
-  config: MarkdownItHexdumpConfig | undefined,
+  config?: MarkdownItHexdumpConfig,
 ): void {
   // Merge options
   config = { ...defaultConfig, ...(config || {}) };
