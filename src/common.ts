@@ -120,7 +120,7 @@ export function processTokens(tokens: BaseToken[]): string {
   }
 
   // Detect if address width is too small
-  if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth) {
+  if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth * 2) {
     throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`);
   }
 
