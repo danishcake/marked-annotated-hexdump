@@ -115,6 +115,9 @@ import { annotatedHex } from "marked-annotated-hexdump/marked";
 
 marked.use(annotatedHex());
 
+// Optionally, you can pass a configuration object
+// marked.use(annotatedHex({ strict: false }));
+
 marked.parse("```annotated-hexdump\nAA BB CC DD\n```");
 ````
 
@@ -122,13 +125,37 @@ marked.parse("```annotated-hexdump\nAA BB CC DD\n```");
 
 ````js
 import markdownIt from "../../node_modules/markdown-it/dist/markdown-it";
-import { extendMarkdownIt } from "marked-annotated-hexdump/markdown-it";
+import {
+	extendMarkdownIt,
+	annotatedHex,
+} from "marked-annotated-hexdump/markdown-it";
 
+// extendMarkdownIt adds to the available highlighters
+// and doesn't replace them
 const md = markdownIt();
 extendMarkdownIt(md);
+// Optionally, you can pass a configuration object
+// extendMarkdownIt(md, { strict: false }));
+
+// You can also pass extendMarkdownIt to md.use
+// md.use(extendMarkdownIt);
+// md.use(extendMarkdownIt, { strict: false });
+
+// You can use simple, non-extending version of the plugin. This is useful if you
+// only intend to highlight hexdumps, or have your own plumbing for extending markdown-it
+// md.use(annotatedHex);
+// md.use(annotatedHex, { strict: false });
 
 md.render("```annotated-hexdump\nAA BB CC DD\n```");
 ````
+
+## Configuration
+
+The `annotatedHex` has an optional configuration object that can be used to customize behaviour.
+
+| Field  | Default | Description                                                                                                                |
+| ------ | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| strict | true    | If true, syntax/parsing errors will cause an exception to be thrown.<br> If false, an error will be reported in the output |
 
 # Limitations
 
