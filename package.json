@@ -97,7 +97,7 @@
     "jest-cli": "^29.7.0",
     "markdown-it": "^14.1.0",
     "marked": "^14.1.0",
-    "rollup": "^4.21.0",
+    "rollup": "^4.21.1",
     "semantic-release": "^24.1.0",
     "tslib": "^2.6.3",
     "typescript": "^5.5.4"
