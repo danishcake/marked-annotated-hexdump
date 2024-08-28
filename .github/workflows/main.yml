@@ -112,6 +112,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
+    environment: Release
     permissions:
       contents: write
       issues: write
