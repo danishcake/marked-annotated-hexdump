@@ -182,11 +182,28 @@ describe('CommandToken', () => {
       expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
     });
 
-    test('allows extra whitespace', () => {
-      const cmd = CommandToken.parseCommand('/highlight    [0:1]     /1');
+    test('allows a note', () => {
+      const cmd = CommandToken.parseCommand('/highlight [0:1] /1 Trailing note');
       expect(cmd).toBeInstanceOf(HighlightCommand);
       expect(cmd.format).toEqual(1);
       expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
+      expect(cmd.text).toEqual('Trailing note');
+    });
+
+    test('whitespace note translated to undefined', () => {
+      const cmd = CommandToken.parseCommand('/highlight [0:1] /1      ');
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.format).toEqual(1);
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
+      expect(cmd.text).toEqual(undefined);
+    });
+
+    test('allows extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/highlight    [0:1]     /1   Trailing note  ');
+      expect(cmd).toBeInstanceOf(HighlightCommand);
+      expect(cmd.format).toEqual(1);
+      expect(cmd.ranges[0]).toEqual({ start: BigInt(0), end: BigInt(1) });
+      expect(cmd.text).toEqual('Trailing note');
     });
 
     test('rejects whitespace format', () => {

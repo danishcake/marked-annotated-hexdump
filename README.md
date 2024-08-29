@@ -71,7 +71,7 @@ The width of the data and address elements in the hexdump can be controlled with
 
 ![](./.img/Example5.png)
 
-You can highlight regions of a hexdump with `/highlight`. This takes two arguments:
+You can highlight regions of a hexdump with `/highlight`. This takes 2/3 arguments:
 
 -   An inclusive range of addresses to highlight. This is enclosed in square brackets `[]`, and can contain single addresses, or ranges delimited with a colon. Multiple ranges (or single addresses) can be combined with commas.
     -   `[1]` - defines a address 0x01 only
@@ -79,6 +79,8 @@ You can highlight regions of a hexdump with `/highlight`. This takes two argumen
     -   `[1:3]` - defines a contiguous highlight over the same three bytes.
     -   `[1:3, 100:200]` - defines two contiguous highlights.
 -   A style in the form `/N`, where N is a number between 0 and 15.
+-   An optional text string, which will be added as a note describing the highlighted region, and will be highlighted
+    in the same colour.
 
 ````markdown
 ```annotated-hexdump
@@ -89,6 +91,7 @@ You can highlight regions of a hexdump with `/highlight`. This takes two argumen
 /highlight [10,11,12,16:19] /1
 /highlight [1F:101] /2
 /highlight [104:106] /3
+/highlight [1E:1F] /4 A text description
 ```
 ````
 

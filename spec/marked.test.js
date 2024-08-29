@@ -296,7 +296,28 @@ describe('marked-extension', () => {
     expect(marked(markdown)).toBe(
       TOP_AND_TAIL_SVG(
         '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      ',
-        '<rect width="11ch" height="1.2em" x="21ch" y="0em" style="fill:#00ff00"/>',
+        '<rect width="11ch" height="1.2em" x="21ch" y="0.0em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
+
+  test('can highlight with a note', () => {
+    // GIVEN 14 bytes of data
+    // AND /highlight set of bytes 4-7 inclusive
+    // AND a note after the highlight
+    // WHEN the markdown is rendered
+    // THEN the SVG is included
+    // AND the note is included
+    marked.use(annotatedHex());
+    const markdown =
+      '```annotated-hexdump\n'
+      + '/highlight [4:7] /1\n'
+      + '0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D\n```';
+
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+        '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D      ',
+        '<rect width="11ch" height="1.2em" x="21ch" y="0.0em" style="fill:#00ff00"/>',
       ),
     );
   });
@@ -310,15 +331,18 @@ describe('marked-extension', () => {
     marked.use(annotatedHex());
     const markdown =
       '```annotated-hexdump\n'
-      + '/highlight [8:A] /1\n'
+      + '/highlight [8:A] /1 Trailing note\n'
       + '/width 8\n'
       + '0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n```';
 
     expect(marked(markdown)).toBe(
       TOP_AND_TAIL_SVG(
         '00000000 00 01 02 03 04 05 06 07\n'
-          + '00000008 08 09 0A 0B 0C 0D 0E 0F',
-        '<rect width="8ch" height="1.2em" x="9ch" y="1.2em" style="fill:#00ff00"/>',
+          + '00000008 08 09 0A 0B 0C 0D 0E 0F\n'
+          + '\n'
+          + 'Trailing note',
+        '<rect width="8ch" height="1.2em" x="9ch" y="1.2em" style="fill:#00ff00"/>'
+        + '<rect width="13ch" height="1.2em" x="0ch" y="3.6em" style="fill:#00ff00"/>',
       ),
     );
   });

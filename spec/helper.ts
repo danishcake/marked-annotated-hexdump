@@ -17,7 +17,7 @@ export const TOP_AND_TAIL_SVG = (data: string, svg: string) => {
   const preSvg =
     '<code style="z-index:1; visibility: hidden; grid-area: container;">'
     + `<svg style="opacity: 0.3; visibility: visible; width: 100%; height: ${
-      1.2 * lineCount
+      (1.2 * lineCount).toFixed(1)
     }em;" xmlns="http://www.w3.oprg/2000/svg">`;
 
   return `${PRE_CODE}${data}</code>${preSvg}${svg}</svg>${POST_CODE}`;
