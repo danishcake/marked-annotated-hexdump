@@ -10,6 +10,7 @@ import {
   HighlightCommand,
   SetBaseAddressCommand,
   NoteCommand,
+  ITokenWithNote as ITokenWithText,
 } from './inputTokens';
 import { maxBigInt, minBigInt } from './bigint';
 
@@ -183,12 +184,12 @@ export function processTokens(tokens: BaseToken[]): string {
           if (upper >= lower) {
             // Units are characters - ch in x and 1.2em in height
             const x0 = BigInt(addressWidth * 2 + 1) + (lower - startPosition) * BigInt(3);
-            const y0 = lines.length - 1;
+            const y0 = ((lines.length - 1) * 1.2).toFixed(1);
             const w = (upper - lower + BigInt(1)) * BigInt(3) - BigInt(1);
             const style = STANDARD_STYLES[tk.format];
 
             highlightRects.push(
-              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0 * 1.2}em" style="${style}"/>`,
+              `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0}em" style="${style}"/>`,
             );
           }
         }
@@ -202,32 +203,33 @@ export function processTokens(tokens: BaseToken[]): string {
   }
 
   // Add notes
-  const noteTokens: NoteCommand[] = tokens.filter(
-    (p) => p instanceof NoteCommand,
-  ) as NoteCommand[];
+  const tokensWithText: ITokenWithText[] = tokens.filter(
+    (p) => p instanceof NoteCommand || (p instanceof HighlightCommand && p.text !== undefined),
+  ) as ITokenWithText[];
 
-  if (noteTokens.length !== 0) {
+  if (tokensWithText.length !== 0) {
     lines.push('');
   }
 
-  for (const nk of noteTokens) {
+  for (const nk of tokensWithText) {
     lines.push(nk.text);
-    const y0 = lines.length - 1;
+    const y0 = ((lines.length - 1) * 1.2).toFixed(1);
     const w = nk.text.length;
     const style = STANDARD_STYLES[nk.format];
 
-    highlightRects.push(`<rect width="${w}ch" height="1.2em" x="0ch" y="${y0 * 1.2}em" style="${style}"/>`);
+    highlightRects.push(`<rect width="${w}ch" height="1.2em" x="0ch" y="${y0}em" style="${style}"/>`);
   }
 
   const svg = (() => {
     if (highlightRects.length === 0) {
       return '';
     }
+    const svgHeight = (lines.length * 1.2).toFixed(1);
     // The SVG gets wrapped in an invisible code element so that it
     // inherits the correct fonts
     return (
       '<code style="z-index:1; visibility: hidden; grid-area: container;">'
-      + `<svg style="opacity: 0.3; visibility: visible; width: 100%; height: ${lines.length * 1.2}em;" xmlns="http://www.w3.oprg/2000/svg">`
+      + `<svg style="opacity: 0.3; visibility: visible; width: 100%; height: ${svgHeight}em;" xmlns="http://www.w3.oprg/2000/svg">`
       + highlightRects.join('')
       + '</svg></code>'
     );

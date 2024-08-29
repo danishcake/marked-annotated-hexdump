@@ -181,11 +181,12 @@ export class SetMissingCharacterCommand extends CommandToken {
 export class HighlightCommand extends CommandToken {
   ranges: { start: bigint; end: bigint }[];
   format: number;
+  text: string | undefined;
 
   constructor(line: string) {
     super();
 
-    const match = /^\/highlight +\[([0-9a-fA-F:,]+)\] +\/(.+)$/.exec(line);
+    const match = /^\/highlight +\[([0-9a-fA-F:,]+)\] +\/([0-9]+) ?(.+)?$/.exec(line);
     if (!match) {
       throw new Error(`Error parsing command '${line}'`);
     }
@@ -208,6 +209,13 @@ export class HighlightCommand extends CommandToken {
       );
     }
     this.format = formatIndex;
+
+    // Extract the optional text
+    // Pure whitespace is ignored
+    this.text = match[3]?.trim() ?? undefined;
+    if (this.text?.length === 0) {
+      this.text = undefined;
+    }
 
     // Now parse the ranges. These will be expressed as a series ranges, separated with commas
     this.ranges = [];
@@ -286,4 +294,9 @@ export class NoteCommand extends CommandToken {
 
     this.text = match[2].trim();
   }
+}
+
+export interface ITokenWithNote {
+  text: string;
+  format: number;
 }
