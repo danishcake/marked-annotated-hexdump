@@ -8,9 +8,9 @@ export class BaseToken {}
  */
 export class DataToken extends BaseToken {
   // The base address of the bytes
-  offset?: bigint;
+  readonly offset?: bigint;
   // The bytes
-  data: ArrayBuffer;
+  readonly data: ArrayBuffer;
 
   constructor(line: string) {
     super();
@@ -85,6 +85,9 @@ export abstract class CommandToken extends BaseToken {
     if (line.startsWith('/note')) {
       return new NoteCommand(line);
     }
+    if (line.startsWith('/decode_gap')) {
+      return new DecodeGapCommand(line);
+    }
     if (line.startsWith('/decode')) {
       return new DecodeCommand(line);
     }
@@ -97,7 +100,7 @@ export abstract class CommandToken extends BaseToken {
  * Represents the /width command
  */
 export class SetWidthCommand extends CommandToken {
-  width: number;
+  readonly width: number;
 
   constructor(line: string) {
     super();
@@ -121,7 +124,7 @@ export class SetWidthCommand extends CommandToken {
  * Represents the /awidth command
  */
 export class SetAddressWidthCommand extends CommandToken {
-  width: number;
+  readonly width: number;
 
   constructor(line: string) {
     super();
@@ -147,7 +150,7 @@ export class SetAddressWidthCommand extends CommandToken {
  * Represents the /case command
  */
 export class SetCaseCommand extends CommandToken {
-  upper: boolean;
+  readonly upper: boolean;
 
   constructor(line: string) {
     super();
@@ -165,7 +168,7 @@ export class SetCaseCommand extends CommandToken {
  * Represents the /missing command
  */
 export class SetMissingCharacterCommand extends CommandToken {
-  missing: string;
+  readonly missing: string;
 
   constructor(line: string) {
     super();
@@ -183,9 +186,9 @@ export class SetMissingCharacterCommand extends CommandToken {
  * Represents the /highlight command
  */
 export class HighlightCommand extends CommandToken {
-  ranges: { start: bigint; end: bigint }[];
-  format: number;
-  text: string | undefined;
+  readonly ranges: { start: bigint; end: bigint }[];
+  readonly format: number;
+  readonly text: string | undefined;
 
   constructor(line: string) {
     super();
@@ -255,7 +258,7 @@ export class HighlightCommand extends CommandToken {
  * Represents the /baseaddress command
  */
 export class SetBaseAddressCommand extends CommandToken {
-  baseAddress: bigint;
+  readonly baseAddress: bigint;
 
   constructor(line: string) {
     super();
@@ -278,8 +281,8 @@ export class SetBaseAddressCommand extends CommandToken {
  * Represents the /note command
  */
 export class NoteCommand extends CommandToken {
-  format: number;
-  text: string;
+  readonly format: number;
+  readonly text: string;
 
   constructor(line: string) {
     super();
@@ -312,7 +315,7 @@ export interface ITokenWithNote {
  * Represents the /decode command
  */
 export class DecodeCommand extends CommandToken {
-  codepage: number;
+  readonly codepage: number;
 
   constructor(line: string) {
     super();
@@ -331,6 +334,29 @@ export class DecodeCommand extends CommandToken {
     // Check the codepage is valid
     if (!Object.keys(cptable).includes(`${this.codepage}`)) {
       throw new Error(`Unsupported codepage '${this.codepage}'`);
+    }
+  }
+}
+
+/**
+ * Represents the /decode_gap command
+ */
+export class DecodeGapCommand extends CommandToken {
+  readonly gap: number;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode_gap +([0-9]+) *$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.gap = Number.parseInt(match[1]);
+
+    // Check the gap is valid
+    if (this.gap < 0 || this.gap > 128) {
+      throw new Error(`Gap ${this.gap} outside valid range 0-128`);
     }
   }
 }

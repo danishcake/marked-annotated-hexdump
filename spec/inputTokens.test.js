@@ -9,6 +9,7 @@ import {
   SetBaseAddressCommand,
   NoteCommand,
   DecodeCommand,
+  DecodeGapCommand,
 } from '../src/inputTokens.ts';
 
 import cptable from 'codepage/dist/sbcs.full.js';
@@ -379,6 +380,35 @@ describe('CommandToken', () => {
 
     test('rejects multibyte codepages', () => {
       expect(() => CommandToken.parseCommand('/decode 231')).toThrow(Error);
+    });
+  });
+
+  describe('/decode_gap command', () => {
+    test('extracts width', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap 7');
+      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd.gap).toEqual(7);
+    });
+
+    test('allows extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap     3    ');
+      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd.gap).toEqual(3);
+    });
+
+    test('allows zero', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap 0');
+      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd.gap).toEqual(0);
+    });
+
+    test('rejects values larger than 128', () => {
+      expect(CommandToken.parseCommand('/decode_gap 128').gap).toEqual(128);
+      expect(() => CommandToken.parseCommand('/decode_gap 129')).toThrow(Error);
+    });
+
+    test('rejects negative', () => {
+      expect(() => CommandToken.parseCommand('/decode_gap -2')).toThrow(Error);
     });
   });
 });
