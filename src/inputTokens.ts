@@ -1,4 +1,5 @@
 import { parseBigIntHex } from './bigint';
+import cptable from 'codepage/dist/sbcs.full.js';
 
 export class BaseToken {}
 
@@ -83,6 +84,9 @@ export abstract class CommandToken extends BaseToken {
     }
     if (line.startsWith('/note')) {
       return new NoteCommand(line);
+    }
+    if (line.startsWith('/decode')) {
+      return new DecodeCommand(line);
     }
 
     throw new Error('Unrecognised command');
@@ -296,7 +300,37 @@ export class NoteCommand extends CommandToken {
   }
 }
 
+/**
+ * A type that anything with a bit of text can be represented by
+ */
 export interface ITokenWithNote {
   text: string;
   format: number;
+}
+
+/**
+ * Represents the /decode command
+ */
+export class DecodeCommand extends CommandToken {
+  codepage: number;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode( +([0-9]+))? *$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    if (match[2] !== undefined) {
+      this.codepage = Number.parseInt(match[2]);
+    } else {
+      this.codepage = 1252;
+    }
+
+    // Check the codepage is valid
+    if (!Object.keys(cptable).includes(`${this.codepage}`)) {
+      throw new Error(`Unsupported codepage '${this.codepage}'`);
+    }
+  }
 }

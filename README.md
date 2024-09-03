@@ -167,7 +167,7 @@ The `annotatedHex` has an optional configuration object that can be used to cust
 
 # Contributing guide
 
-Releases are generated using Semantic Release[](https://semantic-release.gitbook.io/semantic-release), so it's important to use Angular comments. In particular, start the commit message with:
+Releases are generated using [Semantic Release](https://semantic-release.gitbook.io/semantic-release), so it's important to use Angular comments. In particular, start the commit message with:
 
 | Prefix                      | Example                                                        | Version change |
 | --------------------------- | -------------------------------------------------------------- | -------------- |

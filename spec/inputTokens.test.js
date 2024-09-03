@@ -8,7 +8,10 @@ import {
   SetAddressWidthCommand,
   SetBaseAddressCommand,
   NoteCommand,
+  DecodeCommand,
 } from '../src/inputTokens.ts';
+
+import cptable from 'codepage/dist/sbcs.full.js';
 
 describe('DataToken', () => {
   test('non-hex offset is rejected', () => {
@@ -346,6 +349,36 @@ describe('CommandToken', () => {
       const cmd = CommandToken.parseCommand('/note /1 text   ');
       expect(cmd).toBeInstanceOf(NoteCommand);
       expect(cmd.text).toEqual('text');
+    });
+  });
+
+  describe('/decode command', () => {
+    test('defaults to cp1252', () => {
+      const cmd = CommandToken.parseCommand('/decode');
+      expect(cmd).toBeInstanceOf(DecodeCommand);
+      expect(cmd.codepage).toEqual(1252);
+    });
+
+    test('supports all single byte codepages', () => {
+      const singleByteCodePages = Object.keys(cptable)
+        .map(p => Number.parseInt(p))
+        .filter(p => !Number.isNaN(p));
+      for (const sbcp of singleByteCodePages) {
+        expect(CommandToken.parseCommand(`/decode ${sbcp}`).codepage).toEqual(sbcp);
+      }
+    });
+
+    test('rejects unsupported codepages', () => {
+      expect(() => CommandToken.parseCommand('/decode 0')).toThrow(Error);
+    });
+
+    test('allows extra whitespace', () => {
+      expect(CommandToken.parseCommand('/decode   ').codepage).toEqual(1252);
+      expect(CommandToken.parseCommand('/decode   1250   ').codepage).toEqual(1250);
+    });
+
+    test('rejects multibyte codepages', () => {
+      expect(() => CommandToken.parseCommand('/decode 231')).toThrow(Error);
     });
   });
 });
