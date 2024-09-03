@@ -9,7 +9,8 @@ import {
   SetBaseAddressCommand,
   NoteCommand,
   DecodeCommand,
-  DecodeGapCommand,
+  SetDecodeGapCommand,
+  SetDecodeControlCharacterCommand,
 } from '../src/inputTokens.ts';
 
 import cptable from 'codepage/dist/sbcs.full.js';
@@ -131,6 +132,36 @@ describe('CommandToken', () => {
       const cmd = CommandToken.parseCommand('/missing      .');
       expect(cmd).toBeInstanceOf(SetMissingCharacterCommand);
       expect(cmd.missing).toEqual('.');
+    });
+
+    test('rejects multiple characters', () => {
+      expect(() => CommandToken.parseCommand('/missing ..')).toThrow(Error);
+    });
+  });
+
+  describe('decode_control command', () => {
+    test('accepts x', () => {
+      const cmd = CommandToken.parseCommand('/decode_control x');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('x');
+    });
+
+    test('accepts space', () => {
+      const cmd = CommandToken.parseCommand('/decode_control  ');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual(' ');
+    });
+
+    test('accepts .', () => {
+      const cmd = CommandToken.parseCommand('/decode_control .');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('.');
+    });
+
+    test('allows extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/decode_control       .');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('.');
     });
 
     test('rejects multiple characters', () => {
@@ -386,19 +417,19 @@ describe('CommandToken', () => {
   describe('/decode_gap command', () => {
     test('extracts width', () => {
       const cmd = CommandToken.parseCommand('/decode_gap 7');
-      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
       expect(cmd.gap).toEqual(7);
     });
 
     test('allows extra whitespace', () => {
       const cmd = CommandToken.parseCommand('/decode_gap     3    ');
-      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
       expect(cmd.gap).toEqual(3);
     });
 
     test('allows zero', () => {
       const cmd = CommandToken.parseCommand('/decode_gap 0');
-      expect(cmd).toBeInstanceOf(DecodeGapCommand);
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
       expect(cmd.gap).toEqual(0);
     });
 

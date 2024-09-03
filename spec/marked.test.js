@@ -486,4 +486,97 @@ describe('marked-extension', () => {
     const markdown = '```annotated-hexdump\n0 00 01 02 03\n```';
     expect(marked(markdown)).toBe('<pre><code class="language-annotated-hexdump">0 00 01 02 03\n\nError: Uneven number of bytes found</code></pre>\n');
   });
+
+  test('can add decoded text', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n44 45 52 50 FF\n/decode\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL('00000000 44 45 52 50 FF                                  DERPÿ           '),
+    );
+  });
+
+  test('can add decoded text with non-standard codepage', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n44 45 52 50 FF\n/decode 1250\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL('00000000 44 45 52 50 FF                                  DERP˙           '),
+    );
+  });
+
+  test('highlight applied to decoded data', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n44 45 52 50 FF\n/decode\n/highlight [0:1] /1\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+        '00000000 44 45 52 50 FF                                  DERPÿ           ',
+        '<rect width="5ch" height="1.2em" x="9ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="2ch" height="1.2em" x="57ch" y="0.0em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
+
+  test('highlight applied to decoded data with decode gap', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n44 45 52 50 FF\n/decode\n/decode_gap 3\n/highlight [0:1] /1\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(
+        '00000000 44 45 52 50 FF                                    DERPÿ           ',
+        '<rect width="5ch" height="1.2em" x="9ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="2ch" height="1.2em" x="59ch" y="0.0em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
+
+  test('control characters are replaced with .', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n'
+      + '00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n'
+      + '10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f\n'
+      + '20 21 22 7F\n'
+      + '/decode\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL(''
+        + '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F ................\n'
+        + '00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F ................\n'
+        + '00000020 20 21 22 7F                                      !".            ',
+      ),
+    );
+  });
+
+  test('control character substitution changed by /decode_control', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n'
+      + '00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n'
+      + '10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f\n'
+      + '20 21 22 7F\n'
+      + '/decode_control -\n'
+      + '/decode\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL(''
+        + '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F ----------------\n'
+        + '00000010 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F ----------------\n'
+        + '00000020 20 21 22 7F                                      !"-            ',
+      ),
+    );
+  });
+
+  test('decoded text highlighted at non-origin positions', () => {
+    marked.use(annotatedHex({ strict: false }));
+    const markdown = '```annotated-hexdump\n'
+      + '00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n'
+      + '/highlight [0,1,2] /1\n'
+      + '/decode\n```';
+    expect(marked(markdown)).toBe(
+      TOP_AND_TAIL_SVG(''
+        + '00000000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F ................',
+      ''
+        + '<rect width="2ch" height="1.2em" x="9ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="1ch" height="1.2em" x="57ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="2ch" height="1.2em" x="12ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="1ch" height="1.2em" x="58ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="2ch" height="1.2em" x="15ch" y="0.0em" style="fill:#00ff00"/>'
+        + '<rect width="1ch" height="1.2em" x="59ch" y="0.0em" style="fill:#00ff00"/>',
+      ),
+    );
+  });
 });

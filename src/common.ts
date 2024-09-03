@@ -11,8 +11,12 @@ import {
   SetBaseAddressCommand,
   NoteCommand,
   ITokenWithNote as ITokenWithText,
+  DecodeCommand,
+  SetDecodeGapCommand,
+  SetDecodeControlCharacterCommand,
 } from './inputTokens';
 import { maxBigInt, minBigInt } from './bigint';
+import cptable from 'codepage/dist/sbcs.full.js';
 
 /**
  * Standard highlighting styles
@@ -81,9 +85,12 @@ export function processTokens(tokens: BaseToken[]): string {
   let addressWidth = 4; // Units are bytes, not characters
   let offset = BigInt(0);
   const data = new SparseByteArray();
-  let missingNo = '  ';
+  let missingNo = ' ';
+  let decodeControlChar = '.';
   let upperCase = true;
   let baseAddress = BigInt(0);
+  let codePage: number | undefined;
+  let decodeGap = 1;
 
   // Action the tokens
   for (const token of tokens) {
@@ -100,11 +107,23 @@ export function processTokens(tokens: BaseToken[]): string {
     }
 
     if (token instanceof SetMissingCharacterCommand) {
-      missingNo = `${token.missing}${token.missing}`;
+      missingNo = token.missing;
     }
 
     if (token instanceof SetBaseAddressCommand) {
       baseAddress = token.baseAddress;
+    }
+
+    if (token instanceof DecodeCommand) {
+      codePage = token.codepage;
+    }
+
+    if (token instanceof SetDecodeGapCommand) {
+      decodeGap = token.gap;
+    }
+
+    if (token instanceof SetDecodeControlCharacterCommand) {
+      decodeControlChar = token.control;
     }
   }
 
@@ -168,9 +187,40 @@ export function processTokens(tokens: BaseToken[]): string {
         .toString(16)
         .padStart(addressWidth * 2, '0');
       const data = cells
-        .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo)
+        .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo.repeat(2))
         .join(' ');
-      lines.push(address + ' ' + data);
+
+      const decoded = (() => {
+        // If /codepage hasn't been called, skip the decoded text
+        if (codePage === undefined) {
+          return '';
+        }
+
+        return ' '.repeat(decodeGap) + cells
+          .map(p => {
+            if (p === null) {
+              // Missing characters are changed to the missing character
+              return missingNo;
+            } else if (p <= 31 || p === 127) {
+              // Control characters are mapped to the control character substitution
+              return decodeControlChar;
+            } else {
+              // Otherwise use the codepage to translate
+              return cptable[codePage].dec[p];
+            }
+          })
+          .join('');
+      })();
+
+      // Normalise case for address and data
+      const addressAndData = (() => {
+        if (upperCase) {
+          return (address + ' ' + data).toUpperCase();
+        } else {
+          return (address + ' ' + data).toLowerCase();
+        }
+      })();
+      lines.push(addressAndData + decoded);
       lastRowWasBlank = false;
 
       // Now build the highlighted areas
@@ -183,7 +233,8 @@ export function processTokens(tokens: BaseToken[]): string {
           // if there was some overlap, create the rectangle
           if (upper >= lower) {
             // Units are characters - ch in x and 1.2em in height
-            const x0 = BigInt(addressWidth * 2 + 1) + (lower - startPosition) * BigInt(3);
+            const x0 = BigInt(addressWidth * 2 + 1) // The address component
+            + (lower - startPosition) * BigInt(3); // The offset to the first highlighted byte
             const y0 = ((lines.length - 1) * 1.2).toFixed(1);
             const w = (upper - lower + BigInt(1)) * BigInt(3) - BigInt(1);
             const style = STANDARD_STYLES[tk.format];
@@ -191,15 +242,21 @@ export function processTokens(tokens: BaseToken[]): string {
             highlightRects.push(
               `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0}em" style="${style}"/>`,
             );
+
+            // Apply same overlap to decoded text
+            if (codePage !== undefined) {
+              const dx0 = BigInt(addressWidth * 2 + 1) // The address component
+              + BigInt(lineWidth * 3) + BigInt(decodeGap) - BigInt(1) // The data area
+               + (lower - startPosition); // The offset to the first highlighted decoded text char
+              const dw = upper - lower + BigInt(1);
+              highlightRects.push(
+                `<rect width="${dw}ch" height="1.2em" x="${dx0}ch" y="${y0}em" style="${style}"/>`,
+              );
+            }
           }
         }
       }
     }
-  }
-
-  // Normalise case
-  for (let i = 0; i < lines.length; i++) {
-    lines[i] = upperCase ? lines[i].toUpperCase() : lines[i].toLowerCase();
   }
 
   // Add notes

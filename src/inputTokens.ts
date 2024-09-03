@@ -86,7 +86,10 @@ export abstract class CommandToken extends BaseToken {
       return new NoteCommand(line);
     }
     if (line.startsWith('/decode_gap')) {
-      return new DecodeGapCommand(line);
+      return new SetDecodeGapCommand(line);
+    }
+    if (line.startsWith('/decode_control')) {
+      return new SetDecodeControlCharacterCommand(line);
     }
     if (line.startsWith('/decode')) {
       return new DecodeCommand(line);
@@ -341,7 +344,7 @@ export class DecodeCommand extends CommandToken {
 /**
  * Represents the /decode_gap command
  */
-export class DecodeGapCommand extends CommandToken {
+export class SetDecodeGapCommand extends CommandToken {
   readonly gap: number;
 
   constructor(line: string) {
@@ -358,5 +361,23 @@ export class DecodeGapCommand extends CommandToken {
     if (this.gap < 0 || this.gap > 128) {
       throw new Error(`Gap ${this.gap} outside valid range 0-128`);
     }
+  }
+}
+
+/**
+ * Represents the /decode_control command
+ */
+export class SetDecodeControlCharacterCommand extends CommandToken {
+  readonly control: string;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode_control +(.)$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.control = match[1];
   }
 }
