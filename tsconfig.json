@@ -9,7 +9,7 @@
       "strict": true,
       "module": "esnext",
       "noEmitOnError": true,
-      "lib": ["es2017"],
+      "lib": ["ES2020"],
       "esModuleInterop": false,
       "allowSyntheticDefaultImports": true
     },

@@ -11,8 +11,12 @@ import {
   SetBaseAddressCommand,
   NoteCommand,
   ITokenWithNote as ITokenWithText,
+  DecodeCommand,
+  SetDecodeGapCommand,
+  SetDecodeControlCharacterCommand,
 } from './inputTokens';
 import { maxBigInt, minBigInt } from './bigint';
+import cptable from 'codepage/dist/sbcs.full.js';
 
 /**
  * Standard highlighting styles
@@ -72,67 +76,177 @@ export function extractTokens(code: string): BaseToken[] {
 }
 
 /**
- * Processes the tokens, generating the output HTML
- * @param tokens Sequence of tokens to process
- * @returns HTML for the hexdump
+ * Extracted from the tokens, this represents how the hexdump will be rendered
  */
-export function processTokens(tokens: BaseToken[]): string {
-  let lineWidth = 16;
-  let addressWidth = 4; // Units are bytes, not characters
+interface IProcessingConfiguration {
+  lineWidth: number;
+  addressWidth: number; // Units are bytes, not characters
+  data: SparseByteArray;
+  missingNo: string;
+  decodeControlChar: string;
+  upperCase: boolean;
+  baseAddress: bigint;
+  codePage: number | undefined;
+  decodeGap: number;
+  highlightTokens: HighlightCommand[];
+  tokensWithText: ITokenWithText[];
+}
+
+/**
+ * Processes the stream of tokens to extract configuration
+ * @param tokens Sequence of tokens to process
+ * @returns A ProcessingConfiguration
+ */
+function extractProcessingConfiguration(tokens: BaseToken[]): IProcessingConfiguration {
+  const cfg: IProcessingConfiguration = {
+    lineWidth: 16,
+    addressWidth: 4,
+    data: new SparseByteArray(),
+    missingNo: ' ',
+    decodeControlChar: '.',
+    upperCase: true,
+    baseAddress: BigInt(0),
+    codePage: undefined,
+    decodeGap: 1,
+    highlightTokens: [],
+    tokensWithText: [],
+  };
+
   let offset = BigInt(0);
-  const data = new SparseByteArray();
-  let missingNo = '  ';
-  let upperCase = true;
-  let baseAddress = BigInt(0);
 
   // Action the tokens
   for (const token of tokens) {
     if (token instanceof SetWidthCommand) {
-      lineWidth = token.width;
+      cfg.lineWidth = token.width;
     }
 
     if (token instanceof SetAddressWidthCommand) {
-      addressWidth = token.width;
+      cfg.addressWidth = token.width;
     }
 
     if (token instanceof SetCaseCommand) {
-      upperCase = token.upper;
+      cfg.upperCase = token.upper;
     }
 
     if (token instanceof SetMissingCharacterCommand) {
-      missingNo = `${token.missing}${token.missing}`;
+      cfg.missingNo = token.missing;
     }
 
     if (token instanceof SetBaseAddressCommand) {
-      baseAddress = token.baseAddress;
+      cfg.baseAddress = token.baseAddress;
+    }
+
+    if (token instanceof DecodeCommand) {
+      cfg.codePage = token.codepage;
+    }
+
+    if (token instanceof SetDecodeGapCommand) {
+      cfg.decodeGap = token.gap;
+    }
+
+    if (token instanceof SetDecodeControlCharacterCommand) {
+      cfg.decodeControlChar = token.control;
     }
   }
 
   for (const token of tokens) {
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {
-        offset = token.offset + baseAddress;
+        offset = token.offset + cfg.baseAddress;
       }
 
       // Insert the actual data into the bytes array
-      data.setBytes(offset, token.data);
+      cfg.data.setBytes(offset, token.data);
       offset += BigInt(token.data.byteLength);
     }
   }
 
   // Detect if address width is too small
-  if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth * 2) {
-    throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`);
+  if ((cfg.data.getEnd() - BigInt(1)).toString(16).length > cfg.addressWidth * 2) {
+    throw new Error(`Data includes addresses too long for current /awidth of ${cfg.addressWidth}`);
   }
 
   // Detect no data
-  if (data.getOrigin() - data.getEnd() === BigInt(0)) {
+  if (cfg.data.getOrigin() - cfg.data.getEnd() === BigInt(0)) {
     throw new Error('No hex data provided');
   }
 
-  const highlightTokens: HighlightCommand[] = tokens.filter(
+  cfg.highlightTokens = tokens.filter(
     (p) => p instanceof HighlightCommand,
   ) as HighlightCommand[];
+
+  cfg.tokensWithText = tokens.filter(
+    (p) => p instanceof NoteCommand || (p instanceof HighlightCommand && p.text !== undefined),
+  ) as ITokenWithText[];
+
+  return cfg;
+}
+
+/**
+ * Translates an array of bytes (or undefined if missing) into a string, using the specified
+ * code page. Control codes are replaced with decodeControlChar, and missing bytes are replaced with missingNo
+ * @param codePage The codepage to use to translate the text. If undefined, an empty string is returned
+ * @param missingNo Used to represent missing bytes
+ * @param decodeControlChar Used to represent control codes
+ * @param decodeGap The number of spaces to prefix the result with
+ * @param cells The bytes forming a row of the hexdump
+ * @returns A decoded string
+ */
+function decodeText(
+  codePage: number | undefined,
+  missingNo: string,
+  decodeControlChar: string,
+  decodeGap: number,
+  cells: (number | null)[]): string {
+  // If /codepage hasn't been called, skip the decoded text
+  if (codePage === undefined) {
+    return '';
+  }
+
+  return ' '.repeat(decodeGap) + cells
+    .map(p => {
+      if (p === null) {
+        // Missing characters are changed to the missing character
+        return missingNo;
+      } else {
+        // Otherwise use the codepage to translate, then replace any control characters
+        const char = cptable[codePage].dec[p];
+        const codepoint = char.codePointAt(0) ?? 0;
+        // C0 control codes
+        if (codepoint <= 0x1F || codepoint === 0x7F) {
+          return decodeControlChar;
+        }
+        // C1 control codes
+        if (codepoint >= 0x80 && codepoint <= 0x9F) {
+          return decodeControlChar;
+        }
+        // We can safely ignore remaining unicode specific control codes,
+        // as they should not occur in any code pages
+        return char;
+      }
+    })
+    .join('');
+}
+
+/**
+ * Processes the tokens, generating the output HTML
+ * @param tokens Sequence of tokens to process
+ * @returns HTML for the hexdump
+ */
+export function processTokens(tokens: BaseToken[]): string {
+  const {
+    lineWidth,
+    addressWidth,
+    data,
+    missingNo,
+    decodeControlChar,
+    upperCase,
+    baseAddress,
+    codePage,
+    decodeGap,
+    highlightTokens,
+    tokensWithText,
+  } = extractProcessingConfiguration(tokens);
 
   // Determine the address of the first line
   let position = data.getOrigin();
@@ -168,9 +282,19 @@ export function processTokens(tokens: BaseToken[]): string {
         .toString(16)
         .padStart(addressWidth * 2, '0');
       const data = cells
-        .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo)
+        .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo.repeat(2))
         .join(' ');
-      lines.push(address + ' ' + data);
+      const decoded = decodeText(codePage, missingNo, decodeControlChar, decodeGap, cells);
+
+      // Normalise case for address and data
+      const addressAndData = (() => {
+        if (upperCase) {
+          return (address + ' ' + data).toUpperCase();
+        } else {
+          return (address + ' ' + data).toLowerCase();
+        }
+      })();
+      lines.push(addressAndData + decoded);
       lastRowWasBlank = false;
 
       // Now build the highlighted areas
@@ -183,7 +307,8 @@ export function processTokens(tokens: BaseToken[]): string {
           // if there was some overlap, create the rectangle
           if (upper >= lower) {
             // Units are characters - ch in x and 1.2em in height
-            const x0 = BigInt(addressWidth * 2 + 1) + (lower - startPosition) * BigInt(3);
+            const x0 = BigInt(addressWidth * 2 + 1) // The address component
+            + (lower - startPosition) * BigInt(3); // The offset to the first highlighted byte
             const y0 = ((lines.length - 1) * 1.2).toFixed(1);
             const w = (upper - lower + BigInt(1)) * BigInt(3) - BigInt(1);
             const style = STANDARD_STYLES[tk.format];
@@ -191,22 +316,24 @@ export function processTokens(tokens: BaseToken[]): string {
             highlightRects.push(
               `<rect width="${w}ch" height="1.2em" x="${x0}ch" y="${y0}em" style="${style}"/>`,
             );
+
+            // Apply same overlap to decoded text
+            if (codePage !== undefined) {
+              const dx0 = BigInt(addressWidth * 2 + 1) // The address component
+              + BigInt(lineWidth * 3) + BigInt(decodeGap) - BigInt(1) // The data area
+               + (lower - startPosition); // The offset to the first highlighted decoded text char
+              const dw = upper - lower + BigInt(1);
+              highlightRects.push(
+                `<rect width="${dw}ch" height="1.2em" x="${dx0}ch" y="${y0}em" style="${style}"/>`,
+              );
+            }
           }
         }
       }
     }
   }
 
-  // Normalise case
-  for (let i = 0; i < lines.length; i++) {
-    lines[i] = upperCase ? lines[i].toUpperCase() : lines[i].toLowerCase();
-  }
-
   // Add notes
-  const tokensWithText: ITokenWithText[] = tokens.filter(
-    (p) => p instanceof NoteCommand || (p instanceof HighlightCommand && p.text !== undefined),
-  ) as ITokenWithText[];
-
   if (tokensWithText.length !== 0) {
     lines.push('');
   }

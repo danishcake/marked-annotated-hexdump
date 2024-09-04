@@ -106,6 +106,27 @@ You can leave visible notes with the `/note` command. This takes two arguments:
 
 ![](./.img/Example7.png)
 
+You can enable the display of decoded text with the `/decode` command. This takes a single optional argument specify the codepage to decode the bytes using. If omitted, this defaults to 1252.
+
+The spacing between the data and the decoded text can be set with `/decode_gap X`. It defaults to 1, and accepts a range between 0 and 128.
+
+The rendering of control characters (0-31 and 127) can be set using `/decode_control X`, where X is the single character to replace the control character. It defaults to '.'.
+
+````markdown
+```annotated-hexdump
+0000 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+0010 44 45 52 50
+007F 7F
+0080 80 81 82 83 84 85 86 87 88 89 8A 8B 8C 8D 8E 8F
+
+/highlight [0:1F,7F] /0 These are control characters
+/highlight [10:13] /1 These as low ASCII characters
+/highlight [80:8F] /2 These as high characters, affected by the codepage
+```
+````
+
+![](./.img/Example8.png)
+
 ## Usage with marked
 
 ````js
@@ -164,10 +185,12 @@ The `annotatedHex` has an optional configuration object that can be used to cust
 
 -   If you configure your markdown to wrap, the highlighted regions will be at incorrect positions.<br>
     This might be better expressed using spans rather than an svg overlay
+- Decoded text often maps to characters that don't have monospaced characters defined, and therefore look uneven and may be highlighted incorrectly.
+- The SVG overlay breaks text selection
 
 # Contributing guide
 
-Releases are generated using Semantic Release[](https://semantic-release.gitbook.io/semantic-release), so it's important to use Angular comments. In particular, start the commit message with:
+Releases are generated using [Semantic Release](https://semantic-release.gitbook.io/semantic-release), so it's important to use Angular comments. In particular, start the commit message with:
 
 | Prefix                      | Example                                                        | Version change |
 | --------------------------- | -------------------------------------------------------------- | -------------- |

@@ -1,4 +1,5 @@
 import { parseBigIntHex } from './bigint';
+import cptable from 'codepage/dist/sbcs.full.js';
 
 export class BaseToken {}
 
@@ -7,9 +8,9 @@ export class BaseToken {}
  */
 export class DataToken extends BaseToken {
   // The base address of the bytes
-  offset?: bigint;
+  readonly offset?: bigint;
   // The bytes
-  data: ArrayBuffer;
+  readonly data: ArrayBuffer;
 
   constructor(line: string) {
     super();
@@ -84,6 +85,15 @@ export abstract class CommandToken extends BaseToken {
     if (line.startsWith('/note')) {
       return new NoteCommand(line);
     }
+    if (line.startsWith('/decode_gap')) {
+      return new SetDecodeGapCommand(line);
+    }
+    if (line.startsWith('/decode_control')) {
+      return new SetDecodeControlCharacterCommand(line);
+    }
+    if (line.startsWith('/decode')) {
+      return new DecodeCommand(line);
+    }
 
     throw new Error('Unrecognised command');
   }
@@ -93,7 +103,7 @@ export abstract class CommandToken extends BaseToken {
  * Represents the /width command
  */
 export class SetWidthCommand extends CommandToken {
-  width: number;
+  readonly width: number;
 
   constructor(line: string) {
     super();
@@ -117,7 +127,7 @@ export class SetWidthCommand extends CommandToken {
  * Represents the /awidth command
  */
 export class SetAddressWidthCommand extends CommandToken {
-  width: number;
+  readonly width: number;
 
   constructor(line: string) {
     super();
@@ -143,7 +153,7 @@ export class SetAddressWidthCommand extends CommandToken {
  * Represents the /case command
  */
 export class SetCaseCommand extends CommandToken {
-  upper: boolean;
+  readonly upper: boolean;
 
   constructor(line: string) {
     super();
@@ -161,7 +171,7 @@ export class SetCaseCommand extends CommandToken {
  * Represents the /missing command
  */
 export class SetMissingCharacterCommand extends CommandToken {
-  missing: string;
+  readonly missing: string;
 
   constructor(line: string) {
     super();
@@ -179,9 +189,9 @@ export class SetMissingCharacterCommand extends CommandToken {
  * Represents the /highlight command
  */
 export class HighlightCommand extends CommandToken {
-  ranges: { start: bigint; end: bigint }[];
-  format: number;
-  text: string | undefined;
+  readonly ranges: { start: bigint; end: bigint }[];
+  readonly format: number;
+  readonly text: string | undefined;
 
   constructor(line: string) {
     super();
@@ -251,7 +261,7 @@ export class HighlightCommand extends CommandToken {
  * Represents the /baseaddress command
  */
 export class SetBaseAddressCommand extends CommandToken {
-  baseAddress: bigint;
+  readonly baseAddress: bigint;
 
   constructor(line: string) {
     super();
@@ -274,8 +284,8 @@ export class SetBaseAddressCommand extends CommandToken {
  * Represents the /note command
  */
 export class NoteCommand extends CommandToken {
-  format: number;
-  text: string;
+  readonly format: number;
+  readonly text: string;
 
   constructor(line: string) {
     super();
@@ -296,7 +306,78 @@ export class NoteCommand extends CommandToken {
   }
 }
 
+/**
+ * A type that anything with a bit of text can be represented by
+ */
 export interface ITokenWithNote {
   text: string;
   format: number;
+}
+
+/**
+ * Represents the /decode command
+ */
+export class DecodeCommand extends CommandToken {
+  readonly codepage: number;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode( +([0-9]+))? *$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    if (match[2] !== undefined) {
+      this.codepage = Number.parseInt(match[2]);
+    } else {
+      this.codepage = 1252;
+    }
+
+    // Check the codepage is valid
+    if (!Object.keys(cptable).includes(`${this.codepage}`)) {
+      throw new Error(`Unsupported codepage '${this.codepage}'`);
+    }
+  }
+}
+
+/**
+ * Represents the /decode_gap command
+ */
+export class SetDecodeGapCommand extends CommandToken {
+  readonly gap: number;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode_gap +([0-9]+) *$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.gap = Number.parseInt(match[1]);
+
+    // Check the gap is valid
+    if (this.gap < 0 || this.gap > 128) {
+      throw new Error(`Gap ${this.gap} outside valid range 0-128`);
+    }
+  }
+}
+
+/**
+ * Represents the /decode_control command
+ */
+export class SetDecodeControlCharacterCommand extends CommandToken {
+  readonly control: string;
+
+  constructor(line: string) {
+    super();
+
+    const match = /^\/decode_control +(.)$/.exec(line);
+    if (!match) {
+      throw new Error(`Error parsing command '${line}'`);
+    }
+
+    this.control = match[1];
+  }
 }

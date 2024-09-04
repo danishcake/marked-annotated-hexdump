@@ -8,7 +8,12 @@ import {
   SetAddressWidthCommand,
   SetBaseAddressCommand,
   NoteCommand,
+  DecodeCommand,
+  SetDecodeGapCommand,
+  SetDecodeControlCharacterCommand,
 } from '../src/inputTokens.ts';
+
+import cptable from 'codepage/dist/sbcs.full.js';
 
 describe('DataToken', () => {
   test('non-hex offset is rejected', () => {
@@ -127,6 +132,36 @@ describe('CommandToken', () => {
       const cmd = CommandToken.parseCommand('/missing      .');
       expect(cmd).toBeInstanceOf(SetMissingCharacterCommand);
       expect(cmd.missing).toEqual('.');
+    });
+
+    test('rejects multiple characters', () => {
+      expect(() => CommandToken.parseCommand('/missing ..')).toThrow(Error);
+    });
+  });
+
+  describe('decode_control command', () => {
+    test('accepts x', () => {
+      const cmd = CommandToken.parseCommand('/decode_control x');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('x');
+    });
+
+    test('accepts space', () => {
+      const cmd = CommandToken.parseCommand('/decode_control  ');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual(' ');
+    });
+
+    test('accepts .', () => {
+      const cmd = CommandToken.parseCommand('/decode_control .');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('.');
+    });
+
+    test('allows extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/decode_control       .');
+      expect(cmd).toBeInstanceOf(SetDecodeControlCharacterCommand);
+      expect(cmd.control).toEqual('.');
     });
 
     test('rejects multiple characters', () => {
@@ -346,6 +381,65 @@ describe('CommandToken', () => {
       const cmd = CommandToken.parseCommand('/note /1 text   ');
       expect(cmd).toBeInstanceOf(NoteCommand);
       expect(cmd.text).toEqual('text');
+    });
+  });
+
+  describe('/decode command', () => {
+    test('defaults to cp1252', () => {
+      const cmd = CommandToken.parseCommand('/decode');
+      expect(cmd).toBeInstanceOf(DecodeCommand);
+      expect(cmd.codepage).toEqual(1252);
+    });
+
+    test('supports all single byte codepages', () => {
+      const singleByteCodePages = Object.keys(cptable)
+        .map(p => Number.parseInt(p))
+        .filter(p => !Number.isNaN(p));
+      for (const sbcp of singleByteCodePages) {
+        expect(CommandToken.parseCommand(`/decode ${sbcp}`).codepage).toEqual(sbcp);
+      }
+    });
+
+    test('rejects unsupported codepages', () => {
+      expect(() => CommandToken.parseCommand('/decode 0')).toThrow(Error);
+    });
+
+    test('allows extra whitespace', () => {
+      expect(CommandToken.parseCommand('/decode   ').codepage).toEqual(1252);
+      expect(CommandToken.parseCommand('/decode   1250   ').codepage).toEqual(1250);
+    });
+
+    test('rejects multibyte codepages', () => {
+      expect(() => CommandToken.parseCommand('/decode 231')).toThrow(Error);
+    });
+  });
+
+  describe('/decode_gap command', () => {
+    test('extracts width', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap 7');
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
+      expect(cmd.gap).toEqual(7);
+    });
+
+    test('allows extra whitespace', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap     3    ');
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
+      expect(cmd.gap).toEqual(3);
+    });
+
+    test('allows zero', () => {
+      const cmd = CommandToken.parseCommand('/decode_gap 0');
+      expect(cmd).toBeInstanceOf(SetDecodeGapCommand);
+      expect(cmd.gap).toEqual(0);
+    });
+
+    test('rejects values larger than 128', () => {
+      expect(CommandToken.parseCommand('/decode_gap 128').gap).toEqual(128);
+      expect(() => CommandToken.parseCommand('/decode_gap 129')).toThrow(Error);
+    });
+
+    test('rejects negative', () => {
+      expect(() => CommandToken.parseCommand('/decode_gap -2')).toThrow(Error);
     });
   });
 });
