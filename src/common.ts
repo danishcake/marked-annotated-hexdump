@@ -76,82 +76,131 @@ export function extractTokens(code: string): BaseToken[] {
 }
 
 /**
- * Processes the tokens, generating the output HTML
- * @param tokens Sequence of tokens to process
- * @returns HTML for the hexdump
+ * Extracted from the tokens, this represents how the hexdump will be rendered
  */
-export function processTokens(tokens: BaseToken[]): string {
-  let lineWidth = 16;
-  let addressWidth = 4; // Units are bytes, not characters
+interface IProcessingConfiguration {
+  lineWidth: number;
+  addressWidth: number; // Units are bytes, not characters
+  data: SparseByteArray;
+  missingNo: string;
+  decodeControlChar: string;
+  upperCase: boolean;
+  baseAddress: bigint;
+  codePage: number | undefined;
+  decodeGap: number;
+  highlightTokens: HighlightCommand[];
+  tokensWithText: ITokenWithText[];
+}
+
+/**
+ * Processes the stream of tokens to extract configuration
+ * @param tokens Sequence of tokens to process
+ * @returns A ProcessingConfiguration
+ */
+function extractProcessingConfiguration(tokens: BaseToken[]): IProcessingConfiguration {
+  const cfg: IProcessingConfiguration = {
+    lineWidth: 16,
+    addressWidth: 4,
+    data: new SparseByteArray(),
+    missingNo: ' ',
+    decodeControlChar: '.',
+    upperCase: true,
+    baseAddress: BigInt(0),
+    codePage: undefined,
+    decodeGap: 1,
+    highlightTokens: [],
+    tokensWithText: [],
+  };
+
   let offset = BigInt(0);
-  const data = new SparseByteArray();
-  let missingNo = ' ';
-  let decodeControlChar = '.';
-  let upperCase = true;
-  let baseAddress = BigInt(0);
-  let codePage: number | undefined;
-  let decodeGap = 1;
 
   // Action the tokens
   for (const token of tokens) {
     if (token instanceof SetWidthCommand) {
-      lineWidth = token.width;
+      cfg.lineWidth = token.width;
     }
 
     if (token instanceof SetAddressWidthCommand) {
-      addressWidth = token.width;
+      cfg.addressWidth = token.width;
     }
 
     if (token instanceof SetCaseCommand) {
-      upperCase = token.upper;
+      cfg.upperCase = token.upper;
     }
 
     if (token instanceof SetMissingCharacterCommand) {
-      missingNo = token.missing;
+      cfg.missingNo = token.missing;
     }
 
     if (token instanceof SetBaseAddressCommand) {
-      baseAddress = token.baseAddress;
+      cfg.baseAddress = token.baseAddress;
     }
 
     if (token instanceof DecodeCommand) {
-      codePage = token.codepage;
+      cfg.codePage = token.codepage;
     }
 
     if (token instanceof SetDecodeGapCommand) {
-      decodeGap = token.gap;
+      cfg.decodeGap = token.gap;
     }
 
     if (token instanceof SetDecodeControlCharacterCommand) {
-      decodeControlChar = token.control;
+      cfg.decodeControlChar = token.control;
     }
   }
 
   for (const token of tokens) {
     if (token instanceof DataToken) {
       if (token.offset !== undefined) {
-        offset = token.offset + baseAddress;
+        offset = token.offset + cfg.baseAddress;
       }
 
       // Insert the actual data into the bytes array
-      data.setBytes(offset, token.data);
+      cfg.data.setBytes(offset, token.data);
       offset += BigInt(token.data.byteLength);
     }
   }
 
   // Detect if address width is too small
-  if ((data.getEnd() - BigInt(1)).toString(16).length > addressWidth * 2) {
-    throw new Error(`Data includes addresses too long for current /awidth of ${addressWidth}`);
+  if ((cfg.data.getEnd() - BigInt(1)).toString(16).length > cfg.addressWidth * 2) {
+    throw new Error(`Data includes addresses too long for current /awidth of ${cfg.addressWidth}`);
   }
 
   // Detect no data
-  if (data.getOrigin() - data.getEnd() === BigInt(0)) {
+  if (cfg.data.getOrigin() - cfg.data.getEnd() === BigInt(0)) {
     throw new Error('No hex data provided');
   }
 
-  const highlightTokens: HighlightCommand[] = tokens.filter(
+  cfg.highlightTokens = tokens.filter(
     (p) => p instanceof HighlightCommand,
   ) as HighlightCommand[];
+
+  cfg.tokensWithText = tokens.filter(
+    (p) => p instanceof NoteCommand || (p instanceof HighlightCommand && p.text !== undefined),
+  ) as ITokenWithText[];
+
+  return cfg;
+}
+
+/**
+ * Processes the tokens, generating the output HTML
+ * @param tokens Sequence of tokens to process
+ * @returns HTML for the hexdump
+ */
+export function processTokens(tokens: BaseToken[]): string {
+  const {
+    lineWidth,
+    addressWidth,
+    data,
+    missingNo,
+    decodeControlChar,
+    upperCase,
+    baseAddress,
+    codePage,
+    decodeGap,
+    highlightTokens,
+    tokensWithText,
+  } = extractProcessingConfiguration(tokens);
 
   // Determine the address of the first line
   let position = data.getOrigin();
@@ -260,10 +309,6 @@ export function processTokens(tokens: BaseToken[]): string {
   }
 
   // Add notes
-  const tokensWithText: ITokenWithText[] = tokens.filter(
-    (p) => p instanceof NoteCommand || (p instanceof HighlightCommand && p.text !== undefined),
-  ) as ITokenWithText[];
-
   if (tokensWithText.length !== 0) {
     lines.push('');
   }
