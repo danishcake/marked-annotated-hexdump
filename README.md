@@ -125,6 +125,8 @@ The rendering of control characters (0-31 and 127) can be set using `/decode_con
 ```
 ````
 
+![](./.img/Example8.png)
+
 ## Usage with marked
 
 ````js
