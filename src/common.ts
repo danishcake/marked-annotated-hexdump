@@ -183,6 +183,52 @@ function extractProcessingConfiguration(tokens: BaseToken[]): IProcessingConfigu
 }
 
 /**
+ * Translates an array of bytes (or undefined if missing) into a string, using the specified
+ * code page. Control codes are replaced with decodeControlChar, and missing bytes are replaced with missingNo
+ * @param codePage The codepage to use to translate the text. If undefined, an empty string is returned
+ * @param missingNo Used to represent missing bytes
+ * @param decodeControlChar Used to represent control codes
+ * @param decodeGap The number of spaces to prefix the result with
+ * @param cells The bytes forming a row of the hexdump
+ * @returns A decoded string
+ */
+function decodeText(
+  codePage: number | undefined,
+  missingNo: string,
+  decodeControlChar: string,
+  decodeGap: number,
+  cells: (number | null)[]): string {
+  // If /codepage hasn't been called, skip the decoded text
+  if (codePage === undefined) {
+    return '';
+  }
+
+  return ' '.repeat(decodeGap) + cells
+    .map(p => {
+      if (p === null) {
+        // Missing characters are changed to the missing character
+        return missingNo;
+      } else {
+        // Otherwise use the codepage to translate, then replace any control characters
+        const char = cptable[codePage].dec[p];
+        const codepoint = char.codePointAt(0) ?? 0;
+        // C0 control codes
+        if (codepoint <= 0x1F || codepoint === 0x7F) {
+          return decodeControlChar;
+        }
+        // C1 control codes
+        if (codepoint >= 0x80 && codepoint <= 0x9F) {
+          return decodeControlChar;
+        }
+        // We can safely ignore remaining unicode specific control codes,
+        // as they should not occur in any code pages
+        return char;
+      }
+    })
+    .join('');
+}
+
+/**
  * Processes the tokens, generating the output HTML
  * @param tokens Sequence of tokens to process
  * @returns HTML for the hexdump
@@ -238,28 +284,7 @@ export function processTokens(tokens: BaseToken[]): string {
       const data = cells
         .map((p) => p?.toString(16).padStart(2, '0') ?? missingNo.repeat(2))
         .join(' ');
-
-      const decoded = (() => {
-        // If /codepage hasn't been called, skip the decoded text
-        if (codePage === undefined) {
-          return '';
-        }
-
-        return ' '.repeat(decodeGap) + cells
-          .map(p => {
-            if (p === null) {
-              // Missing characters are changed to the missing character
-              return missingNo;
-            } else if (p <= 31 || p === 127) {
-              // Control characters are mapped to the control character substitution
-              return decodeControlChar;
-            } else {
-              // Otherwise use the codepage to translate
-              return cptable[codePage].dec[p];
-            }
-          })
-          .join('');
-      })();
+      const decoded = decodeText(codePage, missingNo, decodeControlChar, decodeGap, cells);
 
       // Normalise case for address and data
       const addressAndData = (() => {
