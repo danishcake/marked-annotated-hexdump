@@ -47,12 +47,25 @@ See [the source code](https://github.com/danishcake/marked-annotated-hexdump)
 # Define some highlighted regions
 /highlight [0,1,2] /0
 /highlight [4:7] /1
-/highlight [20:25] /2
 
 # Add some text notes to explain the highlights
 /note /0 The first three bytes
 /note /1 This range is contiguous
-/note /2 Not the bytes you're looking for
+
+# Add a highlight, with an inline note
+/highlight [20:25] /2 Not the bytes you're looking for
+
+# Show the corresponding text, decoded using the default codepage (1252)
+# You can add an optional codepage argument (e.g. /decode 1250)
+/decode
+
+# Hex dump and decoded text have a 1 character gap
+# This is the default and has no effect
+/decode_gap 1
+
+# Control characters should be rendered as '.'
+# This is the default, and has no effect
+/decode_control .
 ```
     </textarea>
     <div class="output" id="output"></div>
