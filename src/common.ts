@@ -355,7 +355,7 @@ export function processTokens(tokens: BaseToken[]): string {
     // The SVG gets wrapped in an invisible code element so that it
     // inherits the correct fonts
     return (
-      '<code style="z-index:1; visibility: hidden; grid-area: container;">'
+      '<code class="language-annotated-hexdump-overlay" style="z-index:1; visibility: hidden; grid-area: container;">'
       + `<svg style="opacity: 0.3; visibility: visible; width: 100%; height: ${svgHeight}em;" xmlns="http://www.w3.oprg/2000/svg">`
       + highlightRects.join('')
       + '</svg></code>'
