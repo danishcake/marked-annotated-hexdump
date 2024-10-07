@@ -1,18 +1,18 @@
 {
-    "compilerOptions": {
-      "moduleResolution": "node",
-      "removeComments": false,
-      "sourceMap": true,
-      "target": "es2018",
-      "outDir": ".",
-      "declaration": true,
-      "strict": true,
-      "module": "esnext",
-      "noEmitOnError": true,
-      "lib": ["ES2020"],
-      "esModuleInterop": false,
-      "allowSyntheticDefaultImports": true
-    },
-    "include": ["src"],
-    "exclude": []
-  }
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es2018",
+    "outDir": "lib",
+    "declaration": true,
+    "strict": true,
+    "module": "esnext",
+    "noEmitOnError": true,
+    "lib": ["ES2020"],
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"],
+  "exclude": []
+}
