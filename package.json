@@ -93,7 +93,7 @@
     "codepage": "^1.15.0",
     "escape-html": "^1.0.3",
     "eslint": "^9.11.1",
-    "globals": "^15.9.0",
+    "globals": "^15.11.0",
     "jest": "^29.7.0",
     "jest-cli": "^29.7.0",
     "markdown-it": "^14.1.0",
