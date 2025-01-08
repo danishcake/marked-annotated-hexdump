@@ -17,6 +17,7 @@ import {
 } from './inputTokens';
 import { maxBigInt, minBigInt } from './bigint';
 import cptable from 'codepage/dist/sbcs.full.js';
+import escapeHtml from 'escape-html';
 
 /**
  * Standard highlighting styles
@@ -203,7 +204,7 @@ function decodeText(
     return '';
   }
 
-  return ' '.repeat(decodeGap) + cells
+  return escapeHtml(' '.repeat(decodeGap) + cells
     .map(p => {
       if (p === null) {
         // Missing characters are changed to the missing character
@@ -225,7 +226,7 @@ function decodeText(
         return char;
       }
     })
-    .join('');
+    .join(''));
 }
 
 /**
